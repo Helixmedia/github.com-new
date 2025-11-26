@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: helix-agents-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn agent_api_protected:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
