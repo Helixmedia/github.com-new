@@ -9,7 +9,9 @@ from astro_v2_openai import AstroV2OpenAI, WEBSITES
 from user_manager import UserManager
 from stripe_integration import StripePayments, handle_webhook
 from notifications import EmailNotifier
+from ghost_agent import ghost_chat, ghost_write_article, ghost_upload_article, ghost_send_email, ghost_delegate, ghost_status
 import os
+import uuid
 from dotenv import load_dotenv
 from helix_email import send_welcome_vita, send_welcome_astro, send_welcome_sage
 
@@ -354,12 +356,135 @@ def email_subscribe():
 
     return jsonify({'success': True, 'result': result})
 
+# ===========================================
+# GHOST ENDPOINTS - Master Agent
+# ===========================================
+
+@app.route('/api/chat/ghost', methods=['POST'])
+def chat_ghost():
+    """GHOST - Master Agent chat endpoint"""
+    try:
+        data = request.json
+        message = data.get('message', '').strip()
+        session_id = data.get('session_id') or str(uuid.uuid4())
+        user_email = data.get('email')
+
+        if not message:
+            return jsonify({'error': 'Message is required'}), 400
+
+        # Chat with GHOST
+        result = ghost_chat(message, session_id, user_email)
+
+        return jsonify({
+            'response': result['response'],
+            'session_id': result['session_id'],
+            'intent': result.get('intent', {})
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/ghost/write', methods=['POST'])
+def ghost_write():
+    """Have GHOST write an article"""
+    try:
+        data = request.json
+        topic = data.get('topic', '').strip()
+        style = data.get('style', 'informative')
+
+        if not topic:
+            return jsonify({'error': 'Topic is required'}), 400
+
+        result = ghost_write_article(topic, style)
+
+        return jsonify({
+            'success': True,
+            'title': result['title'],
+            'content': result['content'],
+            'word_count': result['word_count'],
+            'status': result['status']
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/ghost/upload', methods=['POST'])
+def ghost_upload():
+    """Have GHOST create and upload an article to askmarket.store"""
+    try:
+        data = request.json
+        topic = data.get('topic', '').strip()
+        content = data.get('content')  # Optional - if provided, uses this content
+
+        if not topic:
+            return jsonify({'error': 'Topic is required'}), 400
+
+        result = ghost_upload_article(topic, content)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/ghost/email', methods=['POST'])
+def ghost_email():
+    """Have GHOST send an email"""
+    try:
+        data = request.json
+        to_email = data.get('to', '').strip()
+        subject = data.get('subject', '').strip()
+        body = data.get('body', '').strip()
+
+        if not all([to_email, subject, body]):
+            return jsonify({'error': 'to, subject, and body are required'}), 400
+
+        result = ghost_send_email(to_email, subject, body)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/ghost/delegate', methods=['POST'])
+def ghost_delegate_task():
+    """Have GHOST delegate a task to another agent"""
+    try:
+        data = request.json
+        task = data.get('task', '').strip()
+        agent = data.get('agent', '').strip().lower()
+
+        if not task or not agent:
+            return jsonify({'error': 'task and agent are required'}), 400
+
+        result = ghost_delegate(task, agent)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/ghost/status', methods=['GET'])
+def ghost_status_endpoint():
+    """Get GHOST status and stats"""
+    try:
+        status = ghost_status()
+        return jsonify(status)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
     return jsonify({
         'status': 'running',
         'agents': {
+            'ghost': 'ASK Market (Master)',
             'astro': 'Event Followers',
             'vita': 'Longevity Futures',
             'sage': 'Silent-AI'
@@ -382,7 +507,7 @@ def serve_chatbot():
 
 if __name__ == '__main__':
     print("="*70)
-    print("PROTECTED AUTONOMOUS AGENT API SERVER")
+    print("HELIX MEDIA ENGINE - AUTONOMOUS AGENT API SERVER")
     print("="*70)
     print("\nProtection Features:")
     print("  [x] Email capture required")
@@ -391,9 +516,16 @@ if __name__ == '__main__':
     print("  [x] Subscription tiers ($1.99/$4.99)")
     print("  [x] Cost tracking")
     print("\nAgents running:")
-    print("  [ASTRO] Event Followers    -> /api/chat/eventfollowers")
-    print("  [VITA]  Longevity Futures  -> /api/chat/longevityfutures")
-    print("  [SAGE]  Silent-AI          -> /api/chat/silentai")
+    print("  [GHOST] ASK Market (MASTER) -> /api/chat/ghost")
+    print("  [ASTRO] Event Followers     -> /api/chat/eventfollowers")
+    print("  [VITA]  Longevity Futures   -> /api/chat/longevityfutures")
+    print("  [SAGE]  Silent-AI           -> /api/chat/silentai")
+    print("\nGHOST Endpoints:")
+    print("  /api/ghost/write    - Write articles")
+    print("  /api/ghost/upload   - Upload to askmarket.store")
+    print("  /api/ghost/email    - Send emails")
+    print("  /api/ghost/delegate - Delegate to other agents")
+    print("  /api/ghost/status   - Get GHOST status")
     print("\nServer starting on http://0.0.0.0:5000")
     print("="*70)
 
