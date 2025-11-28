@@ -10,7 +10,7 @@ import ftplib
 import re
 from datetime import datetime
 from pathlib import Path
-from openai import OpenAI
+import anthropic
 from dotenv import load_dotenv
 import resend
 
@@ -233,7 +233,7 @@ class GhostAgent:
     """
 
     def __init__(self):
-        self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        self.client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
         self.memory = GhostMemory()
         self.config = GHOST_CONFIG
 
@@ -318,18 +318,17 @@ Determine:
 
 Return JSON only."""
 
-        response = self.client.chat.completions.create(
-            model="gpt-4o-mini",
+        response = self.client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=500,
+            system="You analyze user intent. Return only valid JSON.",
             messages=[
-                {"role": "system", "content": "You analyze user intent. Return only valid JSON."},
                 {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"},
-            temperature=0.3
+            ]
         )
 
         try:
-            return json.loads(response.choices[0].message.content)
+            return json.loads(response.content[0].text)
         except:
             return {"intent": "chat", "delegate_to": None, "requires_confirmation": False, "key_details": {}}
 
@@ -363,10 +362,8 @@ GHOST'S STATS:
         if user_facts:
             context_info += f"\nKnown about Paul: {json.dumps(user_facts)}"
 
-        # Build messages for GPT
-        messages = [
-            {"role": "system", "content": self.system_prompt + context_info}
-        ]
+        # Build messages for Claude
+        messages = []
 
         # Add conversation history
         for msg in history[:-1]:  # Exclude current message
@@ -378,14 +375,14 @@ GHOST'S STATS:
         messages.append({"role": "user", "content": message})
 
         # Generate response
-        response = self.client.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,
-            temperature=0.8,
-            max_tokens=1000
+        response = self.client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1000,
+            system=self.system_prompt + context_info,
+            messages=messages
         )
 
-        assistant_response = response.choices[0].message.content
+        assistant_response = response.content[0].text
 
         # Store response
         self.memory.add_conversation(session_id, 'assistant', assistant_response)
@@ -437,17 +434,16 @@ Create engaging, well-structured content with:
 Format with HTML tags (<h2>, <h3>, <p>, <ul>, <li>).
 Return ONLY the article content, no full HTML page structure."""
 
-        response = self.client.chat.completions.create(
-            model="gpt-4o",
+        response = self.client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=3000,
+            system="You are a professional content writer creating high-quality articles.",
             messages=[
-                {"role": "system", "content": "You are a professional content writer creating high-quality articles."},
                 {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=3000
+            ]
         )
 
-        content = response.choices[0].message.content
+        content = response.content[0].text
 
         # Log it
         self.memory.log_content_created(topic, 'draft', word_count)
