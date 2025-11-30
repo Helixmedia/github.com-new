@@ -10,6 +10,9 @@ from user_manager import UserManager
 from stripe_integration import StripePayments, handle_webhook
 from notifications import EmailNotifier
 from ghost_agent import ghost_chat, ghost_write_article, ghost_upload_article, ghost_send_email, ghost_delegate, ghost_status
+from picasso_agent import picasso, generate_image, generate_social_image, get_gallery, get_pending, approve, reject
+from image_storage import storage as image_storage, upload as image_upload, get_unused, stats as image_stats
+from werkzeug.utils import secure_filename
 import os
 import uuid
 from dotenv import load_dotenv
@@ -478,6 +481,316 @@ def ghost_status_endpoint():
         return jsonify({'error': str(e)}), 500
 
 
+# ===========================================
+# PICASSO ENDPOINTS - AI Image Generation
+# ===========================================
+
+@app.route('/api/picasso/generate', methods=['POST'])
+def picasso_generate():
+    """Generate an image using DALL-E 3"""
+    try:
+        data = request.json
+        prompt = data.get('prompt', '').strip()
+        category = data.get('category', 'general')
+        size = data.get('size', '1024x1024')
+
+        if not prompt:
+            return jsonify({'error': 'Prompt is required'}), 400
+
+        result = generate_image(prompt, category)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/picasso/social', methods=['POST'])
+def picasso_social():
+    """Generate a social media optimized image"""
+    try:
+        data = request.json
+        page_category = data.get('category', '').strip()
+        post_topic = data.get('topic', '').strip()
+
+        if not post_topic:
+            return jsonify({'error': 'Topic is required'}), 400
+
+        result = generate_social_image(page_category, post_topic)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/picasso/gallery', methods=['GET'])
+def picasso_gallery():
+    """Get all generated images"""
+    try:
+        images = get_gallery()
+        return jsonify({
+            'success': True,
+            'images': images,
+            'count': len(images)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/picasso/pending', methods=['GET'])
+def picasso_pending():
+    """Get images pending approval"""
+    try:
+        images = get_pending()
+        return jsonify({
+            'success': True,
+            'images': images,
+            'count': len(images)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/picasso/approve/<int:image_id>', methods=['POST'])
+def picasso_approve(image_id):
+    """Approve an image for use"""
+    try:
+        result = approve(image_id)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/picasso/reject/<int:image_id>', methods=['POST'])
+def picasso_reject(image_id):
+    """Reject an image"""
+    try:
+        result = reject(image_id)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ===========================================
+# IMAGE UPLOAD ENDPOINTS
+# ===========================================
+
+@app.route('/api/images/upload', methods=['POST'])
+def upload_image():
+    """Upload an image to a website's storage"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+
+        file = request.files['file']
+        site = request.form.get('site', 'longevity_futures')
+        description = request.form.get('description', file.filename)
+        tags = request.form.get('tags', '').split(',')
+        tags = [t.strip() for t in tags if t.strip()]
+
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+
+        # Save temp file
+        filename = secure_filename(file.filename)
+        temp_path = os.path.join(os.path.dirname(__file__), 'temp_' + filename)
+        file.save(temp_path)
+
+        # Import to storage
+        result = image_upload(site, temp_path, description, tags)
+
+        # Clean up temp
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/images/stats', methods=['GET'])
+def get_image_stats():
+    """Get image stats for all sites"""
+    try:
+        return jsonify(image_stats())
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/images/unused/<site>', methods=['GET'])
+def get_unused_images(site):
+    """Get unused images for a site"""
+    try:
+        images = get_unused(site)
+        return jsonify({'images': images, 'count': len(images)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/upload')
+def upload_page():
+    """Simple upload page"""
+    return '''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Helix Image Upload</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 40px;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+        }
+        h1 { margin-bottom: 30px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .file-input {
+            background: rgba(255,255,255,0.2);
+            border: 2px dashed rgba(255,255,255,0.5);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-input:hover { border-color: #4ecdc4; background: rgba(78,205,196,0.1); }
+        .file-input input { display: none; }
+        .file-input.has-file { border-color: #4ecdc4; background: rgba(78,205,196,0.2); }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover { transform: scale(1.02); }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result.success { background: rgba(78,205,196,0.3); display: block; }
+        .result.error { background: rgba(255,100,100,0.3); display: block; }
+        .preview { max-width: 100%; margin-top: 10px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Image</h1>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label>Website</label>
+                <select name="site" id="site">
+                    <option value="longevity_futures">Longevity Futures</option>
+                    <option value="silent_ai">Silent AI</option>
+                    <option value="ask_market">Ask Market</option>
+                    <option value="event_followers">Event Followers</option>
+                    <option value="inspector_deepdive">Inspector DeepDive</option>
+                    <option value="empire_enthusiast">Empire Enthusiast</option>
+                    <option value="dream_wizz">Dream-Wizz</option>
+                    <option value="urban_green_mowing">Urban Green Mowing</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Image</label>
+                <div class="file-input" id="dropZone">
+                    <input type="file" name="file" id="file" accept="image/*">
+                    <p>Click or drag image here</p>
+                    <img id="preview" class="preview" style="display:none">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" name="description" id="description" placeholder="What is this image about?">
+            </div>
+            <div class="form-group">
+                <label>Tags (comma separated)</label>
+                <input type="text" name="tags" id="tags" placeholder="health, fasting, diet">
+            </div>
+            <button type="submit">Upload</button>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('file');
+        const preview = document.getElementById('preview');
+
+        dropZone.onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => {
+            if (e.target.files[0]) {
+                dropZone.classList.add('has-file');
+                preview.src = URL.createObjectURL(e.target.files[0]);
+                preview.style.display = 'block';
+                dropZone.querySelector('p').textContent = e.target.files[0].name;
+            }
+        };
+
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('has-file'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('has-file');
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            fileInput.files = e.dataTransfer.files;
+            fileInput.onchange({target: fileInput});
+        };
+
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const result = document.getElementById('result');
+
+            try {
+                const res = await fetch('/api/images/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = '✓ Uploaded! Image ID: ' + data.image_id;
+                    e.target.reset();
+                    preview.style.display = 'none';
+                    dropZone.classList.remove('has-file');
+                    dropZone.querySelector('p').textContent = 'Click or drag image here';
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = '✗ Error: ' + data.error;
+                }
+            } catch (err) {
+                result.className = 'result error';
+                result.innerHTML = '✗ Error: ' + err.message;
+            }
+        };
+    </script>
+</body>
+</html>
+'''
+
+
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
@@ -487,7 +800,8 @@ def health():
             'ghost': 'ASK Market (Master)',
             'astro': 'Event Followers',
             'vita': 'Longevity Futures',
-            'sage': 'Silent-AI'
+            'sage': 'Silent-AI',
+            'picasso': 'AI Image Generation'
         },
         'protection': {
             'email_capture': True,
@@ -516,16 +830,24 @@ if __name__ == '__main__':
     print("  [x] Subscription tiers ($1.99/$4.99)")
     print("  [x] Cost tracking")
     print("\nAgents running:")
-    print("  [GHOST] ASK Market (MASTER) -> /api/chat/ghost")
-    print("  [ASTRO] Event Followers     -> /api/chat/eventfollowers")
-    print("  [VITA]  Longevity Futures   -> /api/chat/longevityfutures")
-    print("  [SAGE]  Silent-AI           -> /api/chat/silentai")
+    print("  [GHOST]   ASK Market (MASTER) -> /api/chat/ghost")
+    print("  [ASTRO]   Event Followers     -> /api/chat/eventfollowers")
+    print("  [VITA]    Longevity Futures   -> /api/chat/longevityfutures")
+    print("  [SAGE]    Silent-AI           -> /api/chat/silentai")
+    print("  [PICASSO] Image Generation    -> /api/picasso/*")
     print("\nGHOST Endpoints:")
     print("  /api/ghost/write    - Write articles")
     print("  /api/ghost/upload   - Upload to askmarket.store")
     print("  /api/ghost/email    - Send emails")
     print("  /api/ghost/delegate - Delegate to other agents")
     print("  /api/ghost/status   - Get GHOST status")
+    print("\nPICASSO Endpoints:")
+    print("  /api/picasso/generate   - Generate DALL-E 3 image")
+    print("  /api/picasso/social     - Generate social media image")
+    print("  /api/picasso/gallery    - View all generated images")
+    print("  /api/picasso/pending    - Images awaiting approval")
+    print("  /api/picasso/approve/ID - Approve an image")
+    print("  /api/picasso/reject/ID  - Reject an image")
     print("\nServer starting on http://0.0.0.0:5000")
     print("="*70)
 

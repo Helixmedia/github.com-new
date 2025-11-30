@@ -1,4 +1,5 @@
 services:
+  # Main API - handles chat, social posts, etc
   - type: web
     name: helix-agents-api
     env: python
@@ -11,3 +12,12 @@ services:
         sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
+      - key: META_ACCESS_TOKEN
+        sync: false
+
+  # Patrol Worker - runs 24/7 checking site health every 12 hours
+  - type: worker
+    name: helix-patrol
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python patrol_worker.py
