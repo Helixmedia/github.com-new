@@ -9,4 +9,3 @@ resend
 gunicorn
 aiohttp
 apscheduler
-ftplib
