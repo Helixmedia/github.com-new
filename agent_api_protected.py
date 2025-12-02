@@ -12,11 +12,12 @@ from notifications import EmailNotifier
 from ghost_agent import ghost_chat, ghost_write_article, ghost_upload_article, ghost_send_email, ghost_delegate, ghost_status
 from picasso_agent import picasso, generate_image, generate_social_image, get_gallery, get_pending, approve, reject
 from image_storage import storage as image_storage, upload as image_upload, get_unused, stats as image_stats
+from boomer_agent import BoomerAgent, get_boomer_response
 from werkzeug.utils import secure_filename
 import os
 import uuid
 from dotenv import load_dotenv
-from helix_email import send_welcome_vita, send_welcome_astro, send_welcome_sage
+from helix_email import send_welcome_vita, send_welcome_astro, send_welcome_sage, add_subscriber, remove_subscriber, get_subscriber_stats
 
 load_dotenv()
 
@@ -28,14 +29,16 @@ user_manager = UserManager()
 stripe_payments = StripePayments()
 notifier = EmailNotifier()
 
-# Initialize all three agents
+# Initialize all agents
 print("Initializing agents...")
 agents = {
     'astro': AstroV2OpenAI(WEBSITES['eventfollowers']),
     'vita': AstroV2OpenAI(WEBSITES['longevityfutures']),
     'sage': AstroV2OpenAI(WEBSITES['silentai'])
 }
-print("All agents initialized!")
+# Initialize BOOMER - Next-level longevity sales AI
+boomer = BoomerAgent()
+print("All agents initialized! BOOMER is ready to sell!")
 
 @app.route('/api/chat/eventfollowers', methods=['POST'])
 def chat_eventfollowers():
@@ -44,8 +47,8 @@ def chat_eventfollowers():
 
 @app.route('/api/chat/longevityfutures', methods=['POST'])
 def chat_longevityfutures():
-    """VITA - Longevity Futures chatbot with protection"""
-    return handle_protected_chat('vita', 'longevityfutures')
+    """BOOMER - Longevity Futures sales AI with protection"""
+    return handle_boomer_chat('longevityfutures')
 
 @app.route('/api/chat/silentai', methods=['POST'])
 def chat_silentai():
@@ -171,6 +174,111 @@ def handle_protected_chat(agent_name, site_name):
                 'response': welcome_messages.get(agent_name, "How can I help you?"),
                 'article_created': False
             })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def handle_boomer_chat(site_name):
+    """BOOMER - Next-level longevity sales AI with personalized recommendations"""
+    try:
+        data = request.json
+        user_email = data.get('email', '').strip()
+        user_message = data.get('message', '').strip()
+
+        # Validate inputs
+        if not user_message:
+            return jsonify({'error': 'Message is required'}), 400
+
+        if not user_email:
+            return jsonify({
+                'requires_email': True,
+                'message': 'Please provide your email to get personalized longevity recommendations!',
+                'reason': 'email_required'
+            }), 200
+
+        # Get or create user
+        user, error = user_manager.get_or_create_user(user_email)
+        if not user:
+            return jsonify({
+                'error': 'Invalid email address',
+                'message': 'Please enter a valid email address'
+            }), 400
+
+        # Check rate limiting
+        can_proceed, reason = user_manager.check_rate_limit(user['id'], f'/api/chat/{site_name}')
+        if not can_proceed:
+            return jsonify({
+                'error': 'Rate limit exceeded',
+                'message': 'Too many requests. Please wait a moment and try again.',
+                'retry_after': 60
+            }), 429
+
+        # Check if user can ask questions
+        can_ask, reason = user_manager.can_ask_question(user['id'])
+        if not can_ask:
+            stats = user_manager.get_user_stats(user['id'])
+
+            if reason == 'free_limit_reached':
+                notifier.notify_free_limit_reached(user_email, stats['total_questions'])
+                return jsonify({
+                    'limit_reached': True,
+                    'tier': 'free',
+                    'message': f"You've used all {stats['total_questions']} free questions!",
+                    'upgrade_options': [
+                        {'tier': 'basic', 'price': 1.99, 'questions': 100, 'description': '100 questions per month'},
+                        {'tier': 'unlimited', 'price': 4.99, 'questions': 'unlimited', 'description': 'Unlimited questions'}
+                    ],
+                    'stats': stats
+                }), 200
+
+            elif reason == 'monthly_limit_reached':
+                return jsonify({
+                    'limit_reached': True,
+                    'tier': 'basic',
+                    'message': f"You've used all 100 questions this month!",
+                    'upgrade_option': {'tier': 'unlimited', 'price': 4.99, 'description': 'Upgrade to unlimited for just $3 more'},
+                    'stats': stats
+                }), 200
+
+        # BOOMER handles ALL messages with intelligent responses
+        result = boomer.generate_sales_response(user_message, user_email)
+
+        # Log the question
+        user_manager.log_question(
+            user['id'],
+            user_message,
+            site_name,
+            None,  # No article URL for BOOMER
+            cost=0.02
+        )
+
+        # Get updated stats
+        stats = user_manager.get_user_stats(user['id'])
+
+        # Format products for response
+        products_formatted = []
+        for p in result.get('products', [])[:5]:
+            products_formatted.append({
+                'name': p['name'],
+                'price': p['price'],
+                'rating': p['rating'],
+                'category': p.get('category', ''),
+                'link': f"https://amazon.com/dp/{p['amazon']}?tag=paulstxmbur-20" if 'amazon' in p else None
+            })
+
+        return jsonify({
+            'response': result['response'],
+            'products': products_formatted,
+            'products_html': boomer.format_products_html(result.get('products', [])),
+            'stack': result.get('stack'),
+            'intent': result.get('intent'),
+            'agent': 'BOOMER',
+            'user_stats': {
+                'questions_remaining': stats['remaining_questions'],
+                'tier': stats['tier'],
+                'total_questions': stats['total_questions']
+            }
+        })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -357,7 +465,33 @@ def email_subscribe():
     else:
         result = send_welcome_vita(email)
 
+    # Also save to subscribers database
+    add_subscriber(email, agent)
+
     return jsonify({'success': True, 'result': result})
+
+
+@app.route('/api/email/subscribers', methods=['GET'])
+def get_all_subscribers():
+    """Get all subscribers with stats for dashboard"""
+    try:
+        stats = get_subscriber_stats()
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/email/subscribers/<int:subscriber_id>', methods=['DELETE'])
+def delete_subscriber(subscriber_id):
+    """Delete a subscriber by ID"""
+    try:
+        success = remove_subscriber(subscriber_id=subscriber_id)
+        if success:
+            return jsonify({'success': True, 'message': f'Subscriber {subscriber_id} removed'})
+        return jsonify({'error': 'Subscriber not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 # ===========================================
 # GHOST ENDPOINTS - Master Agent

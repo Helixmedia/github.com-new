@@ -320,18 +320,45 @@ def send_subscription_confirmation(to_email, plan_name, amount, site="Event Foll
 
 
 # ===========================================
-# SUBSCRIBER MANAGEMENT (Simple JSON file)
+# SUBSCRIBER MANAGEMENT (Enhanced JSON file with IDs & timestamps)
 # ===========================================
 
-SUBSCRIBERS_FILE = "subscribers.json"
+import os
+SUBSCRIBERS_FILE = os.path.join(os.path.dirname(__file__), "subscribers.json")
 
 def load_subscribers():
-    """Load subscribers from JSON file"""
+    """Load subscribers from JSON file - enhanced format with IDs"""
     try:
         with open(SUBSCRIBERS_FILE, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            # Migration: convert old format to new if needed
+            if isinstance(data.get("vita"), list) and len(data.get("vita", [])) > 0 and isinstance(data["vita"][0], str):
+                # Old format detected, migrate
+                return _migrate_subscribers(data)
+            return data
     except FileNotFoundError:
-        return {"vita": [], "astro": [], "sage": [], "all": []}
+        return {"subscribers": [], "next_id": 1}
+
+def _migrate_subscribers(old_data):
+    """Migrate old simple list format to new format with IDs"""
+    new_data = {"subscribers": [], "next_id": 1}
+    seen_emails = set()
+
+    for agent in ["vita", "astro", "sage", "all"]:
+        for email in old_data.get(agent, []):
+            if email not in seen_emails:
+                seen_emails.add(email)
+                new_data["subscribers"].append({
+                    "id": new_data["next_id"],
+                    "email": email,
+                    "agent": agent,
+                    "subscribed_at": datetime.now().isoformat(),
+                    "name": ""
+                })
+                new_data["next_id"] += 1
+
+    save_subscribers(new_data)
+    return new_data
 
 def save_subscribers(data):
     """Save subscribers to JSON file"""
@@ -339,33 +366,77 @@ def save_subscribers(data):
         json.dump(data, f, indent=2)
 
 def add_subscriber(email, agent="all", name=""):
-    """Add a new subscriber"""
-    subs = load_subscribers()
+    """Add a new subscriber with ID and timestamp"""
+    data = load_subscribers()
 
-    if email not in subs[agent]:
-        subs[agent].append(email)
-        save_subscribers(subs)
-        print(f"✓ Added {email} to {agent} list")
-        return True
-    else:
-        print(f"Already subscribed: {email}")
-        return False
+    # Check if already exists
+    for sub in data["subscribers"]:
+        if sub["email"].lower() == email.lower():
+            print(f"Already subscribed: {email}")
+            return False
 
-def remove_subscriber(email, agent="all"):
-    """Remove a subscriber"""
-    subs = load_subscribers()
+    # Add new subscriber
+    new_sub = {
+        "id": data["next_id"],
+        "email": email,
+        "agent": agent,
+        "subscribed_at": datetime.now().isoformat(),
+        "name": name
+    }
+    data["subscribers"].append(new_sub)
+    data["next_id"] += 1
+    save_subscribers(data)
+    print(f"[OK] Added {email} to {agent} list (ID: {new_sub['id']})")
+    return True
 
-    if email in subs[agent]:
-        subs[agent].remove(email)
-        save_subscribers(subs)
-        print(f"✓ Removed {email} from {agent} list")
-        return True
+def remove_subscriber(email=None, subscriber_id=None, agent=None):
+    """Remove a subscriber by email or ID"""
+    data = load_subscribers()
+
+    for i, sub in enumerate(data["subscribers"]):
+        if (subscriber_id and sub["id"] == subscriber_id) or \
+           (email and sub["email"].lower() == email.lower()):
+            removed = data["subscribers"].pop(i)
+            save_subscribers(data)
+            print(f"[OK] Removed {removed['email']} (ID: {removed['id']})")
+            return True
     return False
 
-def get_subscribers(agent="all"):
-    """Get list of subscribers for an agent"""
-    subs = load_subscribers()
-    return subs.get(agent, [])
+def get_subscribers(agent=None):
+    """Get list of subscribers, optionally filtered by agent"""
+    data = load_subscribers()
+    if agent and agent != "all":
+        return [s for s in data["subscribers"] if s["agent"] == agent]
+    return data["subscribers"]
+
+def get_subscriber_stats():
+    """Get subscriber statistics for dashboard"""
+    data = load_subscribers()
+    subs = data["subscribers"]
+
+    now = datetime.now()
+    today = now.date()
+    week_ago = now - timedelta(days=7)
+
+    today_count = 0
+    week_count = 0
+
+    for sub in subs:
+        sub_date = datetime.fromisoformat(sub["subscribed_at"])
+        if sub_date.date() == today:
+            today_count += 1
+        if sub_date >= week_ago:
+            week_count += 1
+
+    return {
+        "total_subscribers": len(subs),
+        "today": today_count,
+        "this_week": week_count,
+        "subscribers": sorted(subs, key=lambda x: x["subscribed_at"], reverse=True)
+    }
+
+# Import timedelta for stats
+from datetime import timedelta
 
 
 # ===========================================

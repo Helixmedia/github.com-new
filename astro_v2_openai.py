@@ -81,15 +81,129 @@ class AstroV2OpenAI:
 
         elif niche == 'longevity':
             return {
+                # NAD+ BOOSTERS - Core Longevity
                 "nmn": [
-                    {"name": "NMN 500mg (High Purity)", "price": 49, "rating": 4.5, "affiliate": "i-supplements", "category": "NAD+ Booster"},
-                    {"name": "NMN + Resveratrol Combo", "price": 79, "rating": 5, "affiliate": "i-supplements", "category": "Premium Stack"},
+                    {"name": "ProHealth NMN Pro 1000mg", "price": 109, "rating": 5, "amazon": "B08NF4FDV8", "category": "NAD+ Booster - Premium"},
+                    {"name": "Renue By Science NMN 500mg", "price": 69, "rating": 4.5, "amazon": "B083GT5RRF", "category": "NAD+ Booster - Best Value"},
+                    {"name": "Double Wood NMN 500mg", "price": 49, "rating": 4.5, "amazon": "B08B9N1NFR", "category": "NAD+ Booster - Budget"},
+                    {"name": "Wonderfeel Youngr NMN", "price": 88, "rating": 5, "amazon": "B09XVZG5P8", "category": "NAD+ Booster - Liposomal"},
                 ],
+                "nr": [
+                    {"name": "Tru Niagen NR 300mg", "price": 50, "rating": 5, "amazon": "B07FMS9L9T", "category": "NAD+ Booster - Clinically Proven"},
+                    {"name": "Life Extension NAD+ Cell Regenerator", "price": 46, "rating": 4.5, "amazon": "B07KQJBNGL", "category": "NAD+ Booster - Trusted Brand"},
+                    {"name": "Elysium Basis NR + Pterostilbene", "price": 60, "rating": 4.5, "amazon": "B01HQLMML6", "category": "NAD+ Booster - Combo Formula"},
+                ],
+                # RESVERATROL & POLYPHENOLS
+                "resveratrol": [
+                    {"name": "Life Extension NAD+ Resveratrol Elite", "price": 44, "rating": 5, "amazon": "B08PMJFLP8", "category": "Polyphenol - Best Seller"},
+                    {"name": "Sizyok Piceid Resveratrol + NAD+ + NO", "price": 32, "rating": 4.5, "amazon": "B0D6TQP9S7", "category": "Polyphenol - Heart Health"},
+                    {"name": "Thorne ResveraCel", "price": 62, "rating": 5, "amazon": "B01CZ89906", "category": "Polyphenol - Premium Stack"},
+                    {"name": "NOW Foods Resveratrol 200mg", "price": 24, "rating": 4, "amazon": "B0013OSOEO", "category": "Polyphenol - Budget"},
+                    {"name": "Reserveage Trans-Resveratrol", "price": 78, "rating": 4.5, "amazon": "B00CMO5BAM", "category": "Polyphenol - High Potency"},
+                ],
+                # SENOLYTICS - Zombie Cell Clearance
+                "senolytics": [
+                    {"name": "Doctor's Best Fisetin 100mg", "price": 18, "rating": 5, "amazon": "B07Q59RS7C", "category": "Senolytic - Best Value"},
+                    {"name": "Life Extension Bio-Fisetin", "price": 24, "rating": 5, "amazon": "B09LMVB4QR", "category": "Senolytic - Optimized"},
+                    {"name": "NOW Foods Quercetin 500mg", "price": 22, "rating": 4.5, "amazon": "B0013OSQM6", "category": "Senolytic - Budget"},
+                    {"name": "Thorne Quercetin Phytosome", "price": 38, "rating": 5, "amazon": "B0797K8XQC", "category": "Senolytic - Premium Absorption"},
+                ],
+                # AUTOPHAGY & CELLULAR CLEANUP
+                "spermidine": [
+                    {"name": "Oxford Healthspan Primeadine", "price": 76, "rating": 5, "amazon": "B08WJPMSJG", "category": "Autophagy - Premium"},
+                    {"name": "Double Wood Spermidine 5mg", "price": 25, "rating": 4.5, "amazon": "B09BFFXB5J", "category": "Autophagy - Best Value"},
+                    {"name": "spermidineLIFE Original 365+", "price": 98, "rating": 5, "amazon": "B08RRSQCCY", "category": "Autophagy - Research Grade"},
+                ],
+                # MITOCHONDRIAL SUPPORT
+                "coq10": [
+                    {"name": "Qunol Mega Ubiquinol 100mg", "price": 28, "rating": 5, "amazon": "B004O2I9PM", "category": "Mitochondria - Best Seller"},
+                    {"name": "Life Extension Super Ubiquinol CoQ10", "price": 45, "rating": 5, "amazon": "B002XDQR8E", "category": "Mitochondria - Premium"},
+                    {"name": "Doctor's Best High Absorption CoQ10", "price": 18, "rating": 4.5, "amazon": "B0019GW3G8", "category": "Mitochondria - Budget"},
+                    {"name": "Jarrow Formulas QH-Absorb", "price": 32, "rating": 4.5, "amazon": "B0013OUKFQ", "category": "Mitochondria - High Absorption"},
+                ],
+                "pqq": [
+                    {"name": "Life Extension PQQ 20mg", "price": 30, "rating": 4.5, "amazon": "B005UXEYFY", "category": "Mitochondria - Biogenesis"},
+                    {"name": "Doctor's Best PQQ with BioPQQ", "price": 25, "rating": 4.5, "amazon": "B00EISFBYA", "category": "Mitochondria - Patented"},
+                    {"name": "Jarrow Formulas PQQ 20mg", "price": 28, "rating": 4.5, "amazon": "B00S844SI6", "category": "Mitochondria - Quality"},
+                ],
+                "ala": [
+                    {"name": "NOW Foods Alpha Lipoic Acid 600mg", "price": 24, "rating": 4.5, "amazon": "B0013OXBH6", "category": "Antioxidant - Budget"},
+                    {"name": "Doctor's Best Stabilized R-Lipoic Acid", "price": 28, "rating": 5, "amazon": "B000I4C19U", "category": "Antioxidant - Active Form"},
+                    {"name": "Life Extension Super R-Lipoic Acid", "price": 34, "rating": 5, "amazon": "B0006VXLVM", "category": "Antioxidant - Premium"},
+                ],
+                # METABOLIC HEALTH
+                "berberine": [
+                    {"name": "Thorne Berberine 1000mg", "price": 38, "rating": 5, "amazon": "B07KQJBNGL", "category": "Metabolic - Premium"},
+                    {"name": "Integrative Therapeutics Berberine", "price": 42, "rating": 5, "amazon": "B00FAZ6XVM", "category": "Metabolic - Professional"},
+                    {"name": "NOW Foods Berberine Glucose Support", "price": 22, "rating": 4.5, "amazon": "B00U94JKXC", "category": "Metabolic - Budget"},
+                    {"name": "Double Wood Dihydroberberine", "price": 25, "rating": 4.5, "amazon": "B0874L75C4", "category": "Metabolic - Advanced Form"},
+                ],
+                # COLLAGEN & SKIN
+                "collagen": [
+                    {"name": "Vital Proteins Collagen Peptides", "price": 27, "rating": 5, "amazon": "B00K6JUG4K", "category": "Skin - Best Seller"},
+                    {"name": "Sports Research Collagen Peptides", "price": 24, "rating": 5, "amazon": "B00XQ2XGAA", "category": "Skin - Best Value"},
+                    {"name": "Garden of Life Grass Fed Collagen", "price": 30, "rating": 4.5, "amazon": "B072K4GKLB", "category": "Skin - Organic"},
+                    {"name": "Ancient Nutrition Multi Collagen", "price": 35, "rating": 4.5, "amazon": "B06Y2HLC6Z", "category": "Skin - Multi-Type"},
+                ],
+                # OMEGA-3 & HEART HEALTH
                 "omega3": [
-                    {"name": "Omega-3 Fish Oil (Triple Strength)", "price": 29, "rating": 4.5, "affiliate": "i-supplements", "category": "Heart Health"},
+                    {"name": "Nordic Naturals Ultimate Omega", "price": 35, "rating": 5, "amazon": "B002CQU55U", "category": "Heart Health - Premium"},
+                    {"name": "Carlson The Very Finest Fish Oil", "price": 28, "rating": 5, "amazon": "B001LF39S8", "category": "Heart Health - Pure"},
+                    {"name": "Sports Research Triple Strength", "price": 26, "rating": 4.5, "amazon": "B00HFPKDPG", "category": "Heart Health - Best Value"},
+                    {"name": "Thorne Super EPA", "price": 45, "rating": 5, "amazon": "B0007OWNTI", "category": "Heart Health - Concentrated"},
+                ],
+                # FOUNDATIONAL VITAMINS
+                "vitamin_d": [
+                    {"name": "NOW Foods Vitamin D3 5000 IU", "price": 12, "rating": 5, "amazon": "B0032BH76O", "category": "Immune - Best Value"},
+                    {"name": "Thorne Vitamin D/K2 Liquid", "price": 24, "rating": 5, "amazon": "B00G72CC12", "category": "Immune - Synergistic"},
+                    {"name": "Sports Research Vitamin D3 + K2", "price": 19, "rating": 5, "amazon": "B01GV4O37C", "category": "Immune - Combo"},
+                ],
+                "magnesium": [
+                    {"name": "Life Extension Magnesium Threonate", "price": 30, "rating": 5, "amazon": "B006P536K6", "category": "Brain Health - Premium"},
+                    {"name": "Doctor's Best High Absorption Magnesium", "price": 15, "rating": 4.5, "amazon": "B000BD0RT0", "category": "Sleep - Budget"},
+                    {"name": "NOW Foods Magnesium Citrate", "price": 12, "rating": 4.5, "amazon": "B0013P1GD6", "category": "Relaxation - Budget"},
+                    {"name": "Jarrow Formulas MagMind", "price": 28, "rating": 4.5, "amazon": "B00JJLC772", "category": "Brain Health - Cognitive"},
                 ],
                 "multivitamin": [
-                    {"name": "Men's 50+ Multivitamin", "price": 35, "rating": 4.5, "affiliate": "i-supplements", "category": "Daily Essential"},
+                    {"name": "Thorne Basic Nutrients 2/Day", "price": 42, "rating": 5, "amazon": "B01MYBKHAY", "category": "Daily Essential - Premium"},
+                    {"name": "Life Extension Two-Per-Day", "price": 24, "rating": 5, "amazon": "B00F8IGWMY", "category": "Daily Essential - Complete"},
+                    {"name": "Garden of Life Vitamin Code Men 50+", "price": 45, "rating": 4.5, "amazon": "B003TPGPFA", "category": "Daily Essential - Organic"},
+                    {"name": "Pure Encapsulations O.N.E. Multivitamin", "price": 55, "rating": 5, "amazon": "B00J48SS94", "category": "Daily Essential - Professional"},
+                ],
+                # GUT HEALTH & PROBIOTICS
+                "probiotics": [
+                    {"name": "Seed DS-01 Daily Synbiotic", "price": 50, "rating": 5, "amazon": "B07PJZW5FP", "category": "Gut Health - Premium"},
+                    {"name": "VSL#3 High Potency Probiotic", "price": 60, "rating": 5, "amazon": "B0013OQFP0", "category": "Gut Health - Clinical Strength"},
+                    {"name": "Garden of Life Dr. Formulated", "price": 38, "rating": 4.5, "amazon": "B00Y8MP4G6", "category": "Gut Health - Organic"},
+                    {"name": "Jarrow Formulas Jarro-Dophilus EPS", "price": 28, "rating": 4.5, "amazon": "B0013OXHK0", "category": "Gut Health - Stable"},
+                ],
+                # SLEEP & RECOVERY
+                "sleep": [
+                    {"name": "Life Extension Melatonin 3mg IR/XR", "price": 12, "rating": 4.5, "amazon": "B01MSBA28P", "category": "Sleep - Time Release"},
+                    {"name": "NOW Foods L-Theanine 200mg", "price": 18, "rating": 5, "amazon": "B0013OQEO6", "category": "Sleep - Relaxation"},
+                    {"name": "Jarrow Formulas Sleep Optimizer", "price": 22, "rating": 4.5, "amazon": "B0013OVVJY", "category": "Sleep - Comprehensive"},
+                    {"name": "Glycine Powder 1lb", "price": 16, "rating": 4.5, "amazon": "B00EOXU6US", "category": "Sleep - Deep Sleep"},
+                ],
+                # JOINT HEALTH
+                "joint": [
+                    {"name": "NOW Foods Glucosamine & Chondroitin", "price": 26, "rating": 4.5, "amazon": "B0013OQPBI", "category": "Joint - Classic"},
+                    {"name": "Thorne Curcumin Phytosome", "price": 42, "rating": 5, "amazon": "B01BMJ4P5E", "category": "Joint - Premium Anti-Inflammatory"},
+                    {"name": "Sports Research Turmeric Curcumin", "price": 24, "rating": 4.5, "amazon": "B01DBTFO98", "category": "Joint - Best Value"},
+                    {"name": "Life Extension Arthromax", "price": 34, "rating": 4.5, "amazon": "B001HTJZPI", "category": "Joint - Comprehensive"},
+                ],
+                # BRAIN & COGNITIVE
+                "brain": [
+                    {"name": "Life Extension Cognitex Elite", "price": 52, "rating": 5, "amazon": "B07N7GHZCZ", "category": "Brain - Premium Stack"},
+                    {"name": "NOW Foods Alpha GPC 300mg", "price": 24, "rating": 4.5, "amazon": "B001RXXAN8", "category": "Brain - Cholinergic"},
+                    {"name": "Jarrow Formulas Citicoline CDP Choline", "price": 20, "rating": 4.5, "amazon": "B0013OQHXS", "category": "Brain - Focus"},
+                    {"name": "Lion's Mane Mushroom 500mg", "price": 22, "rating": 4.5, "amazon": "B00WKSIFA4", "category": "Brain - Neurogenesis"},
+                ],
+                # LONGEVITY STACKS - Pre-Built Combos
+                "stacks": [
+                    {"name": "Bryan Johnson Blueprint Stack", "price": 150, "rating": 5, "affiliate": "i-supplements", "category": "Complete Stack - Age Reversal"},
+                    {"name": "David Sinclair Protocol Stack", "price": 120, "rating": 5, "affiliate": "i-supplements", "category": "Complete Stack - Research Based"},
+                    {"name": "Beginner Longevity Stack", "price": 80, "rating": 4.5, "affiliate": "i-supplements", "category": "Complete Stack - Starter"},
+                    {"name": "NAD+ Optimization Stack", "price": 100, "rating": 5, "affiliate": "i-supplements", "category": "Complete Stack - Energy Focus"},
                 ]
             }
 
@@ -474,14 +588,14 @@ WEBSITES = {
     },
     'longevityfutures': {
         'name': 'Longevity Futures',
-        'agent_name': 'VITA',
+        'agent_name': 'BOOMER',
         'ftp_host': '46.202.183.240',
         'ftp_user': 'u907901430.longevityfutures.online',
         'ftp_pass': 'Chillyflakes1$',
         'domain': 'longevityfutures.online',
         'niche': 'longevity',
         'tagline': 'Science-Backed Longevity Research',
-        'product_categories': ['nmn', 'omega3', 'multivitamin', 'resveratrol']
+        'product_categories': ['nmn', 'nr', 'resveratrol', 'senolytics', 'spermidine', 'coq10', 'pqq', 'ala', 'berberine', 'collagen', 'omega3', 'vitamin_d', 'magnesium', 'multivitamin', 'probiotics', 'sleep', 'joint', 'brain', 'stacks']
     },
     'silentai': {
         'name': 'Silent-AI',

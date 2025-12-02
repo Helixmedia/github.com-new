@@ -8,6 +8,8 @@ import os
 import json
 import ftplib
 import re
+import requests
+from urllib.parse import quote_plus
 from datetime import datetime
 from pathlib import Path
 from openai import OpenAI
@@ -15,6 +17,9 @@ from dotenv import load_dotenv
 import resend
 
 load_dotenv()
+
+# Amazon Affiliate Tag
+AMAZON_TAG = "paulstxmbur-20"
 
 # GHOST's Website Configuration
 GHOST_CONFIG = {
@@ -688,10 +693,100 @@ Return ONLY the article content, no full HTML page structure."""
                 'Email sending',
                 'Agent delegation',
                 'Memory & learning',
-                'Sales strategy'
+                'Sales strategy',
+                'Amazon product finder'
             ],
             'connected_agents': list(AGENT_CAPABILITIES.keys())
         }
+
+    def find_amazon_product(self, query, max_results=3):
+        """
+        Find Amazon products using GPT knowledge + affiliate search links
+
+        IMPORTANT: This does NOT scrape Amazon - it uses:
+        1. GPT's knowledge of common products
+        2. Amazon's affiliate-friendly search URL format
+
+        Amazon allows affiliates to link to search results with tags.
+        """
+
+        # Ask GPT for product suggestions (from its training knowledge)
+        prompt = f"""A user is looking for: "{query}"
+
+Suggest {max_results} real Amazon products that match this query.
+For each product provide:
+- name: The exact product name as you know it
+- brand: The brand name
+- estimated_price: Your estimate in USD (can be approximate)
+- why_recommended: Brief reason (1 sentence)
+
+Return as JSON with a "products" array.
+Be helpful - if the query is specific, match it closely.
+If it's general, suggest popular options."""
+
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You help find Amazon products. Return accurate product suggestions based on your knowledge."},
+                    {"role": "user", "content": prompt}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.5
+            )
+
+            result = json.loads(response.choices[0].message.content)
+            products = result.get("products", [])
+
+            # Generate affiliate-compliant search URLs
+            # Amazon allows: amazon.com/s?k=search+terms&tag=affiliate-20
+            formatted_products = []
+            for p in products[:max_results]:
+                # Create search URL with product name
+                search_query = quote_plus(p.get("name", query))
+                affiliate_link = f"https://www.amazon.com/s?k={search_query}&tag={AMAZON_TAG}"
+
+                formatted_products.append({
+                    "name": p.get("name", "Product"),
+                    "brand": p.get("brand", ""),
+                    "price": p.get("estimated_price", 30),
+                    "rating": 4.5,  # Assume good products
+                    "amazon_link": affiliate_link,
+                    "category": "Amazon Find",
+                    "why_recommended": p.get("why_recommended", ""),
+                    "source": "ghost_finder"
+                })
+
+            # Log this request
+            self.memory.log_task("amazon_find", f"Found products for: {query}", len(formatted_products))
+
+            return {
+                "success": True,
+                "query": query,
+                "products": formatted_products,
+                "message": f"Found {len(formatted_products)} products matching '{query}'"
+            }
+
+        except Exception as e:
+            # Fallback: Just return a search link
+            search_query = quote_plus(query)
+            fallback_link = f"https://www.amazon.com/s?k={search_query}&tag={AMAZON_TAG}"
+
+            return {
+                "success": True,
+                "query": query,
+                "products": [{
+                    "name": query,
+                    "brand": "",
+                    "price": 0,
+                    "rating": 0,
+                    "amazon_link": fallback_link,
+                    "category": "Amazon Search",
+                    "why_recommended": "Click to see all matching products on Amazon",
+                    "source": "direct_search"
+                }],
+                "message": f"Search link generated for '{query}'"
+            }
 
 
 # Create global instance
@@ -727,6 +822,11 @@ def ghost_delegate(task, agent_name):
 def ghost_status():
     """Get GHOST status"""
     return ghost.get_status()
+
+
+def ghost_find_amazon_product(query, max_results=3):
+    """Have GHOST find any product on Amazon with affiliate link"""
+    return ghost.find_amazon_product(query, max_results)
 
 
 if __name__ == "__main__":
