@@ -17,7 +17,8 @@ from werkzeug.utils import secure_filename
 import os
 import uuid
 from dotenv import load_dotenv
-from helix_email import send_welcome_vita, send_welcome_astro, send_welcome_sage, add_subscriber, remove_subscriber, get_subscriber_stats
+# MAX - Centralized Email Agent (handles ALL email operations)
+from max_agent import send_welcome_email, add_subscriber, remove_subscriber, get_subscriber_stats, send_failure_alert
 
 load_dotenv()
 
@@ -81,21 +82,14 @@ def handle_protected_chat(agent_name, site_name):
                 'message': 'Please enter a valid email address'
             }), 400
 
-        # Send welcome email if new user
+        # Send welcome email if new user (via MAX email agent)
         if user.get('is_new', False):
             try:
-                if agent_name == 'astro':
-                    send_welcome_astro(user_email)
-                    add_subscriber(user_email, 'astro')
-                elif agent_name == 'sage':
-                    send_welcome_sage(user_email)
-                    add_subscriber(user_email, 'sage')
-                else:
-                    send_welcome_vita(user_email)
-                    add_subscriber(user_email, 'vita')
-                print(f"[{agent_name.upper()}] Welcome email sent to new user: {user_email}")
+                send_welcome_email(user_email, agent_name)
+                print(f"[MAX] Welcome email sent to new user: {user_email} (agent: {agent_name})")
             except Exception as e:
-                print(f"[{agent_name.upper()}] Failed to send welcome email: {e}")
+                print(f"[MAX] Failed to send welcome email: {e}")
+                send_failure_alert(str(e), "Welcome Email Failed", agent_name)
 
         # Check rate limiting
         can_proceed, reason = user_manager.check_rate_limit(user['id'], f'/api/chat/{site_name}')
@@ -220,14 +214,14 @@ def handle_boomer_chat(site_name):
                 'message': 'Please enter a valid email address'
             }), 400
 
-        # Send welcome email if new user
+        # Send welcome email if new user (via MAX email agent)
         if user.get('is_new', False):
             try:
-                send_welcome_vita(user_email)
-                add_subscriber(user_email, 'vita')
-                print(f"[BOOMER] Welcome email sent to new user: {user_email}")
+                send_welcome_email(user_email, 'vita')
+                print(f"[MAX] Welcome email sent to new BOOMER user: {user_email}")
             except Exception as e:
-                print(f"[BOOMER] Failed to send welcome email: {e}")
+                print(f"[MAX] Failed to send welcome email: {e}")
+                send_failure_alert(str(e), "Welcome Email Failed", "vita")
 
         # Check rate limiting
         can_proceed, reason = user_manager.check_rate_limit(user['id'], f'/api/chat/{site_name}')
