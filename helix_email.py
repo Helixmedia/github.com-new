@@ -67,11 +67,11 @@ def send_email(to_email, subject, html_content, from_agent="support"):
 
         email = resend.Emails.send(params)
 
-        print(f"✓ Email sent to {to_email} from {agent['email']}")
+        print(f"[OK] Email sent to {to_email} from {agent['email']}")
         return {"success": True, "id": email["id"]}
 
     except Exception as e:
-        print(f"✗ Failed to send email: {str(e)}")
+        print(f"[ERROR] Failed to send email: {str(e)}")
         return {"success": False, "error": str(e)}
 
 
