@@ -81,6 +81,22 @@ def handle_protected_chat(agent_name, site_name):
                 'message': 'Please enter a valid email address'
             }), 400
 
+        # Send welcome email if new user
+        if user.get('is_new', False):
+            try:
+                if agent_name == 'astro':
+                    send_welcome_astro(user_email)
+                    add_subscriber(user_email, 'astro')
+                elif agent_name == 'sage':
+                    send_welcome_sage(user_email)
+                    add_subscriber(user_email, 'sage')
+                else:
+                    send_welcome_vita(user_email)
+                    add_subscriber(user_email, 'vita')
+                print(f"[{agent_name.upper()}] Welcome email sent to new user: {user_email}")
+            except Exception as e:
+                print(f"[{agent_name.upper()}] Failed to send welcome email: {e}")
+
         # Check rate limiting
         can_proceed, reason = user_manager.check_rate_limit(user['id'], f'/api/chat/{site_name}')
         if not can_proceed:
@@ -203,6 +219,15 @@ def handle_boomer_chat(site_name):
                 'error': 'Invalid email address',
                 'message': 'Please enter a valid email address'
             }), 400
+
+        # Send welcome email if new user
+        if user.get('is_new', False):
+            try:
+                send_welcome_vita(user_email)
+                add_subscriber(user_email, 'vita')
+                print(f"[BOOMER] Welcome email sent to new user: {user_email}")
+            except Exception as e:
+                print(f"[BOOMER] Failed to send welcome email: {e}")
 
         # Check rate limiting
         can_proceed, reason = user_manager.check_rate_limit(user['id'], f'/api/chat/{site_name}')

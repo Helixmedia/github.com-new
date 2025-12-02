@@ -94,7 +94,8 @@ class UserManager:
                 'created_at': user[3],
                 'subscription_tier': user[4],
                 'stripe_customer_id': user[5],
-                'subscription_expires': user[6]
+                'subscription_expires': user[6],
+                'is_new': False
             }, None
 
         # Create new user
@@ -113,7 +114,8 @@ class UserManager:
                 'created_at': datetime.now().isoformat(),
                 'subscription_tier': 'free',
                 'stripe_customer_id': None,
-                'subscription_expires': None
+                'subscription_expires': None,
+                'is_new': True
             }, None
         except sqlite3.IntegrityError:
             conn.close()
