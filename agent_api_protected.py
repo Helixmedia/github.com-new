@@ -19,6 +19,8 @@ import uuid
 from dotenv import load_dotenv
 # MAX - Centralized Email Agent (handles ALL email operations)
 from max_agent import send_welcome_email, add_subscriber, remove_subscriber, get_subscriber_stats, send_failure_alert
+# MAX-VITA - Longevity Futures dedicated email agent with AR (auto-response)
+from max_vita import max_vita, handle_inbound_email as vita_handle_inbound
 
 load_dotenv()
 
@@ -328,6 +330,85 @@ def get_user_stats_endpoint(email):
     stats = user_manager.get_user_stats(user['id'])
     return jsonify(stats)
 
+@app.route('/api/subscribe/eventfollowers', methods=['POST'])
+def subscribe_eventfollowers():
+    """Create Stripe checkout for Event Followers Premium ($4.99/month)"""
+    import stripe
+    data = request.json
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'error': 'Email required'}), 400
+
+    user, error = user_manager.get_or_create_user(email)
+    if not user:
+        return jsonify({'error': error}), 400
+
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    price_id = os.getenv('STRIPE_EVENTFOLLOWERS_PRICE_ID')
+
+    try:
+        session = stripe.checkout.Session.create(
+            customer_email=email,
+            payment_method_types=['card'],
+            line_items=[{
+                'price': price_id,
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url='https://eventfollowers.com/index.html?subscribed=true&session_id={CHECKOUT_SESSION_ID}',
+            cancel_url='https://eventfollowers.com/index.html?cancelled=true',
+            metadata={
+                'site': 'eventfollowers',
+                'tier': 'premium',
+                'email': email
+            }
+        )
+
+        return jsonify({
+            'checkout_url': session.url,
+            'session_id': session.id
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/verify-subscription', methods=['POST'])
+def verify_subscription():
+    """Verify if user has active Event Followers subscription"""
+    import stripe
+    data = request.json
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'subscribed': False}), 200
+
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+    try:
+        customers = stripe.Customer.list(email=email, limit=1)
+        if not customers.data:
+            return jsonify({'subscribed': False}), 200
+
+        customer = customers.data[0]
+        subscriptions = stripe.Subscription.list(
+            customer=customer.id,
+            status='active',
+            limit=10
+        )
+
+        for sub in subscriptions.data:
+            for item in sub['items']['data']:
+                if item['price']['id'] == os.getenv('STRIPE_EVENTFOLLOWERS_PRICE_ID'):
+                    return jsonify({
+                        'subscribed': True,
+                        'subscription_id': sub.id,
+                        'current_period_end': sub.current_period_end
+                    })
+
+        return jsonify({'subscribed': False}), 200
+    except Exception as e:
+        return jsonify({'subscribed': False, 'error': str(e)}), 200
+
 @app.route('/api/upgrade', methods=['POST'])
 def upgrade_user():
     """Create Stripe checkout session for upgrade"""
@@ -508,6 +589,142 @@ def delete_subscriber(subscriber_id):
         if success:
             return jsonify({'success': True, 'message': f'Subscriber {subscriber_id} removed'})
         return jsonify({'error': 'Subscriber not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ===========================================
+# MAX-VITA INBOUND EMAIL WEBHOOK
+# ===========================================
+
+@app.route('/api/webhook/email/vita', methods=['POST'])
+def webhook_email_vita():
+    """
+    Resend webhook for inbound emails to VITA (Longevity Futures)
+
+    Resend sends POST with:
+    - type: "email.received"
+    - data: { email_id, from, to, subject, ... }
+
+    MAX-VITA handles the email and auto-responds using AI
+    """
+    try:
+        webhook_data = request.json
+        print(f"[MAX-VITA] Received webhook: {webhook_data.get('type', 'unknown')}")
+
+        # Handle the inbound email
+        result = vita_handle_inbound(webhook_data)
+
+        # Log result
+        if result.get('success'):
+            print(f"[MAX-VITA] Email processed from: {result.get('from', 'unknown')}")
+            if result.get('response_sent'):
+                print(f"[MAX-VITA] Auto-response sent!")
+        else:
+            print(f"[MAX-VITA] Processing failed: {result.get('reason', result.get('error', 'unknown'))}")
+
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"[MAX-VITA] Webhook error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/webhook/email/test', methods=['POST', 'GET'])
+def webhook_email_test():
+    """Test endpoint to verify webhook is accessible"""
+    if request.method == 'GET':
+        return jsonify({
+            'status': 'ok',
+            'message': 'MAX-VITA webhook endpoint is active',
+            'endpoint': '/api/webhook/email/vita',
+            'method': 'POST',
+            'expects': 'Resend email.received webhook payload'
+        })
+
+    # POST - simulate inbound email
+    data = request.json or {}
+    return jsonify({
+        'status': 'received',
+        'data_received': data,
+        'message': 'Test webhook received successfully'
+    })
+
+
+# ===========================================
+# MAX-VITA SUBSCRIBER MANAGEMENT API
+# ===========================================
+
+@app.route('/api/vita/subscribers/stats', methods=['GET'])
+def vita_subscriber_stats():
+    """Get MAX-VITA subscriber statistics"""
+    try:
+        stats = max_vita.get_subscriber_stats()
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/vita/subscribers', methods=['GET'])
+def vita_get_subscribers():
+    """Get all MAX-VITA subscribers"""
+    try:
+        status = request.args.get('status', 'active')
+        subscribers = max_vita.get_subscribers(status)
+        return jsonify({'subscribers': subscribers, 'count': len(subscribers)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/vita/subscribers/add', methods=['POST'])
+def vita_add_subscriber():
+    """Add a new subscriber to MAX-VITA"""
+    try:
+        data = request.json
+        email = data.get('email', '').strip()
+        name = data.get('name', '')
+        source = data.get('source', 'api')
+
+        if not email:
+            return jsonify({'error': 'Email required'}), 400
+
+        result = max_vita.add_subscriber(email, name, source)
+
+        # Send welcome email if new subscriber
+        if result.get('is_new'):
+            try:
+                max_vita.send_welcome_email(email, name or 'Friend')
+                max_vita.mark_welcome_sent(result['id'])
+            except Exception as e:
+                print(f"[MAX-VITA] Failed to send welcome email: {e}")
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/vita/subscribers/<int:subscriber_id>', methods=['DELETE'])
+def vita_remove_subscriber(subscriber_id):
+    """Remove a subscriber from MAX-VITA"""
+    try:
+        result = max_vita.remove_subscriber(subscriber_id=subscriber_id)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/vita/test-email', methods=['POST'])
+def vita_test_email():
+    """Send a test email via MAX-VITA"""
+    try:
+        data = request.json
+        email = data.get('email', '').strip()
+
+        if not email:
+            return jsonify({'error': 'Email required'}), 400
+
+        result = max_vita.send_welcome_email(email, 'Test User')
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -954,13 +1171,20 @@ def health():
             'astro': 'Event Followers',
             'vita': 'Longevity Futures',
             'sage': 'Silent-AI',
-            'picasso': 'AI Image Generation'
+            'picasso': 'AI Image Generation',
+            'boomer': 'Longevity Sales AI',
+            'max': 'Centralized Email System',
+            'max-vita': 'Longevity Futures Email (AR enabled)'
         },
         'protection': {
             'email_capture': True,
             'question_limits': True,
             'rate_limiting': True,
             'subscription_tiers': ['free', 'basic', 'unlimited']
+        },
+        'webhooks': {
+            'email_inbound_vita': '/api/webhook/email/vita',
+            'stripe': '/api/webhook'
         }
     })
 
@@ -983,11 +1207,13 @@ if __name__ == '__main__':
     print("  [x] Subscription tiers ($1.99/$4.99)")
     print("  [x] Cost tracking")
     print("\nAgents running:")
-    print("  [GHOST]   ASK Market (MASTER) -> /api/chat/ghost")
-    print("  [ASTRO]   Event Followers     -> /api/chat/eventfollowers")
-    print("  [VITA]    Longevity Futures   -> /api/chat/longevityfutures")
-    print("  [SAGE]    Silent-AI           -> /api/chat/silentai")
-    print("  [PICASSO] Image Generation    -> /api/picasso/*")
+    print("  [GHOST]    ASK Market (MASTER)  -> /api/chat/ghost")
+    print("  [ASTRO]    Event Followers      -> /api/chat/eventfollowers")
+    print("  [BOOMER]   Longevity Sales AI   -> /api/chat/longevityfutures")
+    print("  [SAGE]     Silent-AI            -> /api/chat/silentai")
+    print("  [PICASSO]  Image Generation     -> /api/picasso/*")
+    print("  [MAX]      Email System         -> Centralized email handling")
+    print("  [MAX-VITA] Longevity Email (AR) -> /api/webhook/email/vita")
     print("\nGHOST Endpoints:")
     print("  /api/ghost/write    - Write articles")
     print("  /api/ghost/upload   - Upload to askmarket.store")
@@ -1001,6 +1227,11 @@ if __name__ == '__main__':
     print("  /api/picasso/pending    - Images awaiting approval")
     print("  /api/picasso/approve/ID - Approve an image")
     print("  /api/picasso/reject/ID  - Reject an image")
+    print("\nMAX Email Endpoints:")
+    print("  /api/webhook/email/vita - Resend inbound webhook (Longevity Futures)")
+    print("  /api/webhook/email/test - Test webhook endpoint")
+    print("  /api/email/subscribe    - Email subscription")
+    print("  /api/email/subscribers  - Get all subscribers")
     print("\nServer starting on http://0.0.0.0:5000")
     print("="*70)
 
