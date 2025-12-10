@@ -336,6 +336,7 @@ def subscribe_eventfollowers():
     import stripe
     data = request.json
     email = data.get('email')
+    username = data.get('username', 'Seeker')  # Username for leaderboard
 
     if not email:
         return jsonify({'error': 'Email required'}), 400
@@ -361,7 +362,8 @@ def subscribe_eventfollowers():
             metadata={
                 'site': 'eventfollowers',
                 'tier': 'premium',
-                'email': email
+                'email': email,
+                'username': username
             }
         )
 
@@ -534,6 +536,9 @@ def stripe_webhook():
             if site == 'eventfollowers':
                 from max_agent import max_agent
 
+                # Get username from metadata (for leaderboard)
+                username = event_data.get('username', 'Seeker')
+
                 # Gift purchases
                 gift_map = {
                     'coffee': ('Coffee', '☕', '$3'),
@@ -544,15 +549,15 @@ def stripe_webhook():
 
                 if product in gift_map:
                     gift_name, gift_icon, gift_amount = gift_map[product]
-                    max_agent.send_gift_thankyou(event_data['email'], 'Seeker', gift_name, gift_icon, gift_amount)
+                    max_agent.send_gift_thankyou(event_data['email'], username, gift_name, gift_icon, gift_amount)
                 elif product == 'animation_pass':
-                    max_agent.send_animation_pass_thankyou(event_data['email'], 'Seeker')
+                    max_agent.send_animation_pass_thankyou(event_data['email'], username)
                 elif product in ['starter', 'seeker', 'messages']:
                     # Message pack purchase
-                    max_agent.send_purchase_thankyou(event_data['email'], 'Seeker', product, f"${amount:.0f}")
+                    max_agent.send_purchase_thankyou(event_data['email'], username, product, f"${amount:.0f}")
                 else:
                     # Premium subscription - send welcome email
-                    send_welcome_email(event_data['email'], 'entity', 'Seeker')
+                    send_welcome_email(event_data['email'], 'entity', username)
 
             # Send notification (webhook payment - recurring billing)
             notifier.notify_new_subscription(
