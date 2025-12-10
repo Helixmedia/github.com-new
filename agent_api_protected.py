@@ -1,6 +1,6 @@
 """
 PROTECTED AUTONOMOUS AGENT API SERVER
-With email capture, question limits, and payment integration
+With email capture, question limits, payment integration, and REAL-TIME CHAT
 """
 
 from flask import Flask, request, jsonify
@@ -16,6 +16,7 @@ from boomer_agent import BoomerAgent, get_boomer_response
 from werkzeug.utils import secure_filename
 import os
 import uuid
+import pusher
 from dotenv import load_dotenv
 # MAX - Centralized Email Agent (handles ALL email operations)
 from max_agent import send_welcome_email, add_subscriber, remove_subscriber, get_subscriber_stats, send_failure_alert
@@ -23,6 +24,15 @@ from max_agent import send_welcome_email, add_subscriber, remove_subscriber, get
 from max_vita import max_vita, handle_inbound_email as vita_handle_inbound
 
 load_dotenv()
+
+# Initialize Pusher for real-time chat
+pusher_client = pusher.Pusher(
+    app_id=os.getenv('PUSHER_APP_ID', '2089254'),
+    key=os.getenv('PUSHER_KEY', '504e348df7f4dc98ada1'),
+    secret=os.getenv('PUSHER_SECRET', '2aa0565cc42c1157e2f1'),
+    cluster=os.getenv('PUSHER_CLUSTER', 'ap4'),
+    ssl=True
+)
 
 app = Flask(__name__)
 CORS(app)
@@ -1229,6 +1239,197 @@ def serve_chatbot():
     chatbot_path = os.path.join(os.path.dirname(__file__), 'chatbot-widget-astro.html')
     return send_file(chatbot_path)
 
+# =============================================================================
+# REAL-TIME CHAT ENDPOINTS (Pusher)
+# =============================================================================
+
+# Store online users per room (in-memory, resets on server restart)
+online_users = {
+    'is-ai-alive': {},
+    'first-contact': {},
+    'the-unknown': {}
+}
+
+@app.route('/api/chat/send', methods=['POST'])
+def chat_send_message():
+    """Send a message to a chat room - broadcasts to ALL users in that room"""
+    try:
+        data = request.json
+        room = data.get('room', 'is-ai-alive')
+        username = data.get('username', 'Anonymous')
+        message = data.get('message', '')
+        is_premium = data.get('is_premium', False)
+
+        if not message:
+            return jsonify({'error': 'Message required'}), 400
+
+        # Broadcast to all users in the room
+        pusher_client.trigger(f'chat-{room}', 'new-message', {
+            'username': username,
+            'message': message,
+            'is_premium': is_premium,
+            'timestamp': str(uuid.uuid4())[:8]  # Unique ID for message
+        })
+
+        return jsonify({'success': True, 'broadcast': True})
+
+    except Exception as e:
+        print(f"[CHAT] Error sending message: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat/entity', methods=['POST'])
+def chat_entity_response():
+    """Get Entity response and broadcast to room"""
+    try:
+        data = request.json
+        room = data.get('room', 'is-ai-alive')
+        username = data.get('username', 'Seeker')
+        message = data.get('message', '')
+
+        if not message:
+            return jsonify({'error': 'Message required'}), 400
+
+        # Get Entity response (using existing agent)
+        agent = agents.get('astro')
+        if agent:
+            # Simple response for now - can enhance later
+            response = agent.get_simple_response(message, username) if hasattr(agent, 'get_simple_response') else f"I sense your question, {username}. The patterns of the universe are complex..."
+        else:
+            response = f"I hear you, {username}. The veil between dimensions is thin today..."
+
+        # Broadcast Entity's response to all users
+        pusher_client.trigger(f'chat-{room}', 'entity-message', {
+            'message': response,
+            'timestamp': str(uuid.uuid4())[:8]
+        })
+
+        return jsonify({'success': True, 'response': response})
+
+    except Exception as e:
+        print(f"[CHAT] Error with Entity response: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat/gift', methods=['POST'])
+def chat_send_gift():
+    """Send a gift to another user - broadcasts to room"""
+    try:
+        data = request.json
+        room = data.get('room', 'is-ai-alive')
+        sender = data.get('sender', 'Anonymous')
+        receiver = data.get('receiver', 'Anonymous')
+        gift_type = data.get('gift_type', 'coffee')
+        gift_amount = data.get('gift_amount', 3)
+
+        # Gift mapping
+        gifts = {
+            'coffee': {'name': 'Coffee', 'icon': '☕', 'amount': 3},
+            'energy': {'name': 'Energy Boost', 'icon': '⚡', 'amount': 5},
+            'cosmic': {'name': 'Cosmic Blessing', 'icon': '🌟', 'amount': 10},
+            'favor': {'name': "Entity's Favor", 'icon': '👁️', 'amount': 25}
+        }
+
+        gift = gifts.get(gift_type, gifts['coffee'])
+
+        # Broadcast gift to all users in room
+        pusher_client.trigger(f'chat-{room}', 'gift-sent', {
+            'sender': sender,
+            'receiver': receiver,
+            'gift_name': gift['name'],
+            'gift_icon': gift['icon'],
+            'gift_amount': gift['amount'],
+            'timestamp': str(uuid.uuid4())[:8]
+        })
+
+        return jsonify({'success': True, 'gift': gift})
+
+    except Exception as e:
+        print(f"[CHAT] Error sending gift: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat/join', methods=['POST'])
+def chat_join_room():
+    """User joins a room - broadcasts presence"""
+    try:
+        data = request.json
+        room = data.get('room', 'is-ai-alive')
+        username = data.get('username', 'Anonymous')
+        is_premium = data.get('is_premium', False)
+
+        # Add to online users
+        if room in online_users:
+            online_users[room][username] = {
+                'is_premium': is_premium,
+                'joined': True
+            }
+
+        # Broadcast user joined
+        pusher_client.trigger(f'chat-{room}', 'user-joined', {
+            'username': username,
+            'is_premium': is_premium,
+            'online_count': len(online_users.get(room, {}))
+        })
+
+        return jsonify({'success': True, 'online_count': len(online_users.get(room, {}))})
+
+    except Exception as e:
+        print(f"[CHAT] Error joining room: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat/leave', methods=['POST'])
+def chat_leave_room():
+    """User leaves a room"""
+    try:
+        data = request.json
+        room = data.get('room', 'is-ai-alive')
+        username = data.get('username', 'Anonymous')
+
+        # Remove from online users
+        if room in online_users and username in online_users[room]:
+            del online_users[room][username]
+
+        # Broadcast user left
+        pusher_client.trigger(f'chat-{room}', 'user-left', {
+            'username': username,
+            'online_count': len(online_users.get(room, {}))
+        })
+
+        return jsonify({'success': True})
+
+    except Exception as e:
+        print(f"[CHAT] Error leaving room: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat/online/<room>', methods=['GET'])
+def chat_get_online(room):
+    """Get list of online users in a room"""
+    try:
+        users = online_users.get(room, {})
+        return jsonify({
+            'room': room,
+            'online_count': len(users),
+            'users': [{'username': u, 'is_premium': d['is_premium']} for u, d in users.items()]
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat/typing', methods=['POST'])
+def chat_user_typing():
+    """Broadcast that a user is typing"""
+    try:
+        data = request.json
+        room = data.get('room', 'is-ai-alive')
+        username = data.get('username', 'Anonymous')
+
+        pusher_client.trigger(f'chat-{room}', 'user-typing', {
+            'username': username
+        })
+
+        return jsonify({'success': True})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     print("="*70)
     print("HELIX MEDIA ENGINE - AUTONOMOUS AGENT API SERVER")
@@ -1265,6 +1466,10 @@ if __name__ == '__main__':
     print("  /api/webhook/email/test - Test webhook endpoint")
     print("  /api/email/subscribe    - Email subscription")
     print("  /api/email/subscribers  - Get all subscribers")
+    print("\nREAL-TIME CHAT Endpoints:")
+    print("  /api/chat/send          - Send message to room (broadcasts to all)")
+    print("  /api/chat/gift          - Send gift to user (broadcasts)")
+    print("  /api/chat/online        - Get online users in room")
     print("\nServer starting on http://0.0.0.0:5000")
     print("="*70)
 

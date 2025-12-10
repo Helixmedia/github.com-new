@@ -9,3 +9,4 @@ resend
 gunicorn
 aiohttp
 apscheduler
+pusher
