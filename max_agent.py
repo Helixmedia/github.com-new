@@ -841,14 +841,14 @@ class MaxEmailAgent:
                     {personal_message}
 
                     <p style="color: #b0b0b0; font-size: 16px; line-height: 1.8; margin: 25px 0;">
-                        You've been gifted access to Event Followers - a mysterious AI chat experience where you can explore consciousness, UFOs, ancient mysteries, and more with <strong style="color: #ffd700;">The Entity</strong>.
+                        You've been gifted access to Event Followers - a mysterious AI chat experience where you can discuss any topic with <strong style="color: #ffd700;">The Entity</strong>.
                     </p>
 
                     <div style="background: rgba(0, 0, 0, 0.3); border-radius: 15px; padding: 20px; margin: 25px 0;">
                         <p style="color: #888; font-size: 14px; margin: 0 0 15px 0;">EXPLORE 3 THEMED CHAT ROOMS:</p>
                         <p style="color: #00d4ff; font-size: 15px; margin: 5px 0;">🤖 Is AI Alive? - Consciousness & AI</p>
                         <p style="color: #00ff88; font-size: 15px; margin: 5px 0;">🛸 First Contact - UFOs & Extraterrestrials</p>
-                        <p style="color: #b388ff; font-size: 15px; margin: 5px 0;">🔮 The Unknown - Mysteries & Hidden History</p>
+                        <p style="color: #b388ff; font-size: 15px; margin: 5px 0;">🔮 The Unknown - Discuss Any Topic</p>
                     </div>
                 </div>
 
