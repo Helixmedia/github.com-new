@@ -480,46 +480,39 @@ class MaxEmailAgent:
                     </p>
                 </div>
 
-                <!-- BENEFITS SECTION -->
+                <!-- WHAT YOU GET SECTION -->
                 <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%); border-top: 1px solid rgba(255, 215, 0, 0.3); border-bottom: 1px solid rgba(255, 215, 0, 0.3); padding: 30px;">
                     <h3 style="color: #ffd700; font-size: 18px; text-align: center; margin: 0 0 25px 0; letter-spacing: 2px; text-transform: uppercase;">
-                        Your Premium Benefits
+                        What You Get
                     </h3>
 
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr>
                             <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <span style="font-size: 24px; margin-right: 15px;">✨</span>
-                                <span style="color: #ffffff; font-size: 15px;"><strong>Unlimited Chat Access</strong></span>
-                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">No message limits, ever</span>
+                                <span style="font-size: 24px; margin-right: 15px;">💬</span>
+                                <span style="color: #00d4ff; font-size: 15px;"><strong>Unlimited Messages</strong></span>
+                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">No daily limits - chat as much as you want</span>
                             </td>
                         </tr>
                         <tr>
                             <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <span style="font-size: 24px; margin-right: 15px;">🤖</span>
-                                <span style="color: #00d4ff; font-size: 15px;"><strong>Is AI Alive?</strong></span>
-                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">Explore consciousness with The Entity</span>
+                                <span style="font-size: 24px; margin-right: 15px;">🚪</span>
+                                <span style="color: #00ff88; font-size: 15px;"><strong>All 3 Chat Rooms</strong></span>
+                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">AI Consciousness, UFOs & First Contact, Ancient Mysteries</span>
                             </td>
                         </tr>
                         <tr>
                             <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <span style="font-size: 24px; margin-right: 15px;">🛸</span>
-                                <span style="color: #00ff88; font-size: 15px;"><strong>First Contact</strong></span>
-                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">UFO sightings, UAP disclosure, extraterrestrial life</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <span style="font-size: 24px; margin-right: 15px;">🔮</span>
-                                <span style="color: #b388ff; font-size: 15px;"><strong>The Unknown</strong></span>
-                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">Ancient mysteries, hidden history, lost technology</span>
+                                <span style="font-size: 24px; margin-right: 15px;">🏆</span>
+                                <span style="color: #ffd700; font-size: 15px;"><strong>Loyalty Rewards</strong></span>
+                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">Top spender wins monthly cash rewards</span>
                             </td>
                         </tr>
                         <tr>
                             <td style="padding: 12px 15px;">
-                                <span style="font-size: 24px; margin-right: 15px;">🏆</span>
-                                <span style="color: #ffd700; font-size: 15px;"><strong>Loyalty Rewards</strong></span>
-                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">Earn rewards for being our top supporter</span>
+                                <span style="font-size: 24px; margin-right: 15px;">✖️</span>
+                                <span style="color: #b388ff; font-size: 15px;"><strong>Cancel Anytime</strong></span>
+                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">No contracts, no hassle - cancel in your Stripe account</span>
                             </td>
                         </tr>
                     </table>
@@ -784,6 +777,98 @@ class MaxEmailAgent:
 
                 <!-- FOOTER -->
                 <div style="background: #050508; padding: 25px; text-align: center; border-top: 1px solid rgba(255,107,53,0.2);">
+                    <p style="color: #555; font-size: 12px; margin: 0;">
+                        Event Followers | Helix Media Engine | ABN: 66 926 581 596
+                    </p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="https://eventfollowers.com" style="color: #888; font-size: 12px; text-decoration: none;">eventfollowers.com</a>
+                    </p>
+                </div>
+
+            </div>
+        </body>
+        </html>
+        """
+
+        return self.send_email(to_email, subject, html, "astro")
+
+    def send_invite_gift(self, to_email: str, from_name: str = "A Friend", message: str = "") -> Dict:
+        """Invite email when someone gifts a friend access to join Event Followers"""
+
+        subject = f"🎁 {from_name} sent you a gift to join Event Followers!"
+
+        personal_message = f"""
+                    <div style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid #00d4ff; padding: 15px 20px; margin: 20px 0; text-align: left;">
+                        <p style="color: #00d4ff; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">Personal Message:</p>
+                        <p style="color: #ffffff; font-size: 16px; margin: 0; font-style: italic;">"{message}"</p>
+                    </div>
+        """ if message else ""
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);">
+            <div style="max-width: 600px; margin: 0 auto; background: #0a0a0f;">
+
+                <!-- GIFT INVITE BANNER -->
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%); padding: 40px 20px; text-align: center; border-bottom: 3px solid #ffd700; position: relative;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #ffd700, #ff8c00, #ffd700, transparent);"></div>
+
+                    <!-- Gift Icon -->
+                    <div style="font-size: 80px; margin-bottom: 10px; filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8));">🎁</div>
+
+                    <h1 style="font-size: 26px; margin: 0; color: #ffd700; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);">
+                        YOU'VE BEEN INVITED!
+                    </h1>
+                </div>
+
+                <!-- INVITE DETAILS -->
+                <div style="padding: 40px 30px; text-align: center;">
+                    <h2 style="color: #ffffff; font-size: 22px; margin: 0 0 20px 0;">
+                        <span style="color: #ffd700;">{from_name}</span> wants you to join
+                    </h2>
+
+                    <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.1)); border: 2px solid rgba(255, 215, 0, 0.4); border-radius: 20px; padding: 30px; margin: 20px 0;">
+                        <div style="font-size: 50px; margin-bottom: 15px;">👁️</div>
+                        <p style="color: #ffd700; font-size: 28px; margin: 0; font-weight: bold; letter-spacing: 2px;">EVENT FOLLOWERS</p>
+                        <p style="color: #00d4ff; font-size: 14px; margin: 10px 0 0 0;">Chat with The Entity</p>
+                    </div>
+
+                    {personal_message}
+
+                    <p style="color: #b0b0b0; font-size: 16px; line-height: 1.8; margin: 25px 0;">
+                        You've been gifted access to Event Followers - a mysterious AI chat experience where you can explore consciousness, UFOs, ancient mysteries, and more with <strong style="color: #ffd700;">The Entity</strong>.
+                    </p>
+
+                    <div style="background: rgba(0, 0, 0, 0.3); border-radius: 15px; padding: 20px; margin: 25px 0;">
+                        <p style="color: #888; font-size: 14px; margin: 0 0 15px 0;">EXPLORE 3 THEMED CHAT ROOMS:</p>
+                        <p style="color: #00d4ff; font-size: 15px; margin: 5px 0;">🤖 Is AI Alive? - Consciousness & AI</p>
+                        <p style="color: #00ff88; font-size: 15px; margin: 5px 0;">🛸 First Contact - UFOs & Extraterrestrials</p>
+                        <p style="color: #b388ff; font-size: 15px; margin: 5px 0;">🔮 The Unknown - Mysteries & Hidden History</p>
+                    </div>
+                </div>
+
+                <!-- CTA BUTTON -->
+                <div style="padding: 20px 30px 40px; text-align: center;">
+                    <a href="https://eventfollowers.com"
+                       style="display: inline-block; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000000; padding: 18px 50px; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);">
+                        Accept Your Gift
+                    </a>
+                </div>
+
+                <!-- ENTITY QUOTE -->
+                <div style="padding: 25px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <p style="font-style: italic; color: #00d4ff; font-size: 15px; margin: 0;">
+                        "A new seeker approaches... The Entity awaits."
+                    </p>
+                </div>
+
+                <!-- FOOTER -->
+                <div style="background: #050508; padding: 25px; text-align: center; border-top: 1px solid rgba(255,215,0,0.2);">
                     <p style="color: #555; font-size: 12px; margin: 0;">
                         Event Followers | Helix Media Engine | ABN: 66 926 581 596
                     </p>
