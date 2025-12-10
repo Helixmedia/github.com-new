@@ -526,6 +526,11 @@ def stripe_webhook():
                 stripe_customer_id=event_data['customer_id']
             )
 
+            # Send welcome email based on site
+            site = event_data.get('site', '')
+            if site == 'eventfollowers':
+                send_welcome_email(event_data['email'], 'entity', 'Seeker')
+
             # Send notification (webhook payment - recurring billing)
             notifier.notify_new_subscription(
                 email=event_data['email'],
