@@ -529,13 +529,27 @@ def stripe_webhook():
             # Send welcome email based on site and product
             site = event_data.get('site', '')
             product = event_data.get('product', '')
+            amount = event_data.get('amount', 0)
 
             if site == 'eventfollowers':
-                if product in ['starter', 'seeker', 'messages']:
-                    # Message pack purchase - send thank you email
-                    from max_agent import max_agent
-                    amount = f"${event_data.get('amount', 5):.0f}"
-                    max_agent.send_purchase_thankyou(event_data['email'], 'Seeker', product, amount)
+                from max_agent import max_agent
+
+                # Gift purchases
+                gift_map = {
+                    'coffee': ('Coffee', '☕', '$3'),
+                    'energy': ('Energy Boost', '⚡', '$5'),
+                    'cosmic': ('Cosmic Blessing', '🌟', '$10'),
+                    'favor': ("Entity's Favor", '👁️', '$25')
+                }
+
+                if product in gift_map:
+                    gift_name, gift_icon, gift_amount = gift_map[product]
+                    max_agent.send_gift_thankyou(event_data['email'], 'Seeker', gift_name, gift_icon, gift_amount)
+                elif product == 'animation_pass':
+                    max_agent.send_animation_pass_thankyou(event_data['email'], 'Seeker')
+                elif product in ['starter', 'seeker', 'messages']:
+                    # Message pack purchase
+                    max_agent.send_purchase_thankyou(event_data['email'], 'Seeker', product, f"${amount:.0f}")
                 else:
                     # Premium subscription - send welcome email
                     send_welcome_email(event_data['email'], 'entity', 'Seeker')

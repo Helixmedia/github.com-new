@@ -643,6 +643,162 @@ class MaxEmailAgent:
 
         return self.send_email(to_email, subject, html, "astro")
 
+    def send_gift_thankyou(self, to_email: str, subscriber_name: str = "Seeker", gift_name: str = "Gift", gift_icon: str = "🎁", amount: str = "$5", recipient: str = "") -> Dict:
+        """Thank you email for gift purchases (Coffee, Energy, Cosmic, Entity's Favor)"""
+
+        subject = f"Gift Sent! {gift_icon} {gift_name}"
+
+        recipient_text = f" to <strong style='color: #00d4ff;'>{recipient}</strong>" if recipient else ""
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);">
+            <div style="max-width: 600px; margin: 0 auto; background: #0a0a0f;">
+
+                <!-- GIFT SENT BANNER -->
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%); padding: 40px 20px; text-align: center; border-bottom: 3px solid #ffd700; position: relative;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #ffd700, #ff8c00, #ffd700, transparent);"></div>
+
+                    <!-- Gift Icon -->
+                    <div style="font-size: 80px; margin-bottom: 10px; filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8));">{gift_icon}</div>
+
+                    <h1 style="font-size: 28px; margin: 0; color: #ffd700; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);">
+                        GIFT SENT!
+                    </h1>
+                </div>
+
+                <!-- GIFT DETAILS -->
+                <div style="padding: 40px 30px; text-align: center;">
+                    <h2 style="color: #ffffff; font-size: 22px; margin: 0 0 20px 0;">
+                        Thank you, <span style="color: #ffd700;">{subscriber_name}</span>!
+                    </h2>
+
+                    <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.1)); border: 2px solid rgba(255, 215, 0, 0.4); border-radius: 20px; padding: 30px; margin: 20px 0;">
+                        <div style="font-size: 50px; margin-bottom: 15px;">{gift_icon}</div>
+                        <p style="color: #ffd700; font-size: 24px; margin: 0; font-weight: bold;">{gift_name}</p>
+                        <p style="color: #00ff88; font-size: 20px; margin: 10px 0 0 0;">{amount}</p>
+                    </div>
+
+                    <p style="color: #b0b0b0; font-size: 16px; line-height: 1.8; margin: 25px 0;">
+                        Your gift has been sent{recipient_text}!<br>
+                        This contribution helps build your position on the Leaderboard.
+                    </p>
+
+                    <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 10px; padding: 15px; margin-top: 20px;">
+                        <p style="color: #00ff88; font-size: 14px; margin: 0;">
+                            🏆 <strong>Leaderboard Updated!</strong> Keep gifting to climb the ranks and earn Loyalty Rewards!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CTA BUTTON -->
+                <div style="padding: 20px 30px 40px; text-align: center;">
+                    <a href="https://eventfollowers.com"
+                       style="display: inline-block; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000000; padding: 18px 50px; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);">
+                        Back to Chat
+                    </a>
+                </div>
+
+                <!-- FOOTER -->
+                <div style="background: #050508; padding: 25px; text-align: center; border-top: 1px solid rgba(255,215,0,0.2);">
+                    <p style="color: #555; font-size: 12px; margin: 0;">
+                        Event Followers | Helix Media Engine | ABN: 66 926 581 596
+                    </p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="https://eventfollowers.com" style="color: #888; font-size: 12px; text-decoration: none;">eventfollowers.com</a>
+                    </p>
+                </div>
+
+            </div>
+        </body>
+        </html>
+        """
+
+        return self.send_email(to_email, subject, html, "astro")
+
+    def send_animation_pass_thankyou(self, to_email: str, subscriber_name: str = "Seeker") -> Dict:
+        """Thank you email for animation pass purchase ($1/day)"""
+
+        subject = "🎬 Animation Pass Activated!"
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);">
+            <div style="max-width: 600px; margin: 0 auto; background: #0a0a0f;">
+
+                <!-- ANIMATION PASS BANNER -->
+                <div style="background: linear-gradient(135deg, #ff6b35 0%, #ff0066 100%); padding: 40px 20px; text-align: center; position: relative;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #ffffff, transparent);"></div>
+
+                    <!-- Animation Icon -->
+                    <div style="font-size: 70px; margin-bottom: 10px;">🎬</div>
+
+                    <h1 style="font-size: 28px; margin: 0; color: #ffffff; text-transform: uppercase; letter-spacing: 3px;">
+                        ANIMATIONS UNLOCKED!
+                    </h1>
+                    <p style="color: rgba(255,255,255,0.8); font-size: 14px; margin-top: 10px;">
+                        24 Hour Access Activated
+                    </p>
+                </div>
+
+                <!-- ANIMATION DETAILS -->
+                <div style="padding: 40px 30px; text-align: center;">
+                    <h2 style="color: #ffffff; font-size: 22px; margin: 0 0 20px 0;">
+                        Hey <span style="color: #ff6b35;">{subscriber_name}</span>!
+                    </h2>
+
+                    <p style="color: #b0b0b0; font-size: 16px; line-height: 1.8; margin: 20px 0;">
+                        Your Animation Pass is now <strong style="color: #00ff88;">ACTIVE</strong>! You have 24 hours of unlimited animations.
+                    </p>
+
+                    <div style="background: rgba(255, 107, 53, 0.1); border: 1px solid rgba(255, 107, 53, 0.3); border-radius: 15px; padding: 25px; margin: 25px 0;">
+                        <p style="color: #ff6b35; font-size: 14px; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 2px;">Animations Unlocked</p>
+                        <div style="font-size: 40px; letter-spacing: 15px;">
+                            🤖 ⚡ 🐵 🛸 🎆
+                        </div>
+                        <p style="color: #888; font-size: 13px; margin-top: 15px;">Robot • Lightning • Monkey • UFO • Fireworks</p>
+                    </div>
+
+                    <p style="color: #888; font-size: 14px; margin-top: 20px;">
+                        Express yourself in the chat with awesome animations!
+                    </p>
+                </div>
+
+                <!-- CTA BUTTON -->
+                <div style="padding: 20px 30px 40px; text-align: center;">
+                    <a href="https://eventfollowers.com"
+                       style="display: inline-block; background: linear-gradient(135deg, #ff6b35, #ff0066); color: #ffffff; padding: 18px 50px; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 25px rgba(255, 107, 53, 0.4);">
+                        Start Animating
+                    </a>
+                </div>
+
+                <!-- FOOTER -->
+                <div style="background: #050508; padding: 25px; text-align: center; border-top: 1px solid rgba(255,107,53,0.2);">
+                    <p style="color: #555; font-size: 12px; margin: 0;">
+                        Event Followers | Helix Media Engine | ABN: 66 926 581 596
+                    </p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="https://eventfollowers.com" style="color: #888; font-size: 12px; text-decoration: none;">eventfollowers.com</a>
+                    </p>
+                </div>
+
+            </div>
+        </body>
+        </html>
+        """
+
+        return self.send_email(to_email, subject, html, "astro")
+
     def send_welcome_sage(self, to_email: str, subscriber_name: str = "Friend") -> Dict:
         """Welcome email for Silent AI subscribers"""
 
