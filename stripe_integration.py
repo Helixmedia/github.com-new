@@ -221,6 +221,9 @@ def handle_webhook(payload, sig_header):
             'event': 'payment_successful',
             'email': session.get('customer_email'),
             'tier': session['metadata'].get('tier'),
+            'site': session['metadata'].get('site'),
+            'product': session['metadata'].get('product'),
+            'amount': session.get('amount_total', 0) / 100,
             'customer_id': session.get('customer'),
             'subscription_id': session.get('subscription')
         }, None

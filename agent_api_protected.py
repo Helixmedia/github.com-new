@@ -526,10 +526,19 @@ def stripe_webhook():
                 stripe_customer_id=event_data['customer_id']
             )
 
-            # Send welcome email based on site
+            # Send welcome email based on site and product
             site = event_data.get('site', '')
+            product = event_data.get('product', '')
+
             if site == 'eventfollowers':
-                send_welcome_email(event_data['email'], 'entity', 'Seeker')
+                if product in ['starter', 'seeker', 'messages']:
+                    # Message pack purchase - send thank you email
+                    from max_agent import max_agent
+                    amount = f"${event_data.get('amount', 5):.0f}"
+                    max_agent.send_purchase_thankyou(event_data['email'], 'Seeker', product, amount)
+                else:
+                    # Premium subscription - send welcome email
+                    send_welcome_email(event_data['email'], 'entity', 'Seeker')
 
             # Send notification (webhook payment - recurring billing)
             notifier.notify_new_subscription(

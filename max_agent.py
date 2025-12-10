@@ -527,9 +527,9 @@ class MaxEmailAgent:
 
                 <!-- CTA BUTTON -->
                 <div style="padding: 40px 30px; text-align: center;">
-                    <a href="https://eventfollowers.com/is-ai-alive.html"
+                    <a href="https://eventfollowers.com"
                        style="display: inline-block; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000000; padding: 18px 50px; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);">
-                        Enter The Chat Rooms
+                        Enter Event Followers
                     </a>
                 </div>
 
@@ -561,6 +561,85 @@ class MaxEmailAgent:
 
         # Add to Resend Audiences for persistent storage
         self.add_contact(to_email, "astro", first_name=subscriber_name)
+
+        return self.send_email(to_email, subject, html, "astro")
+
+    def send_purchase_thankyou(self, to_email: str, subscriber_name: str = "Seeker", product: str = "messages", amount: str = "$5") -> Dict:
+        """Thank you email for message pack purchases (Starter $2, Seeker $5, etc.)"""
+
+        subject = f"Thank You For Your Purchase - {amount} Message Pack"
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);">
+            <div style="max-width: 600px; margin: 0 auto; background: #0a0a0f;">
+
+                <!-- THANK YOU BANNER -->
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%); padding: 40px 20px; text-align: center; border-bottom: 3px solid #00ff88; position: relative;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #00ff88, #00d4ff, #00ff88, transparent);"></div>
+
+                    <!-- Checkmark Icon -->
+                    <div style="font-size: 70px; margin-bottom: 10px; filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.8));">✓</div>
+
+                    <h1 style="font-size: 28px; margin: 0; color: #00ff88; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);">
+                        THANK YOU
+                    </h1>
+                    <p style="color: #ffd700; font-size: 16px; margin-top: 10px;">
+                        Your purchase is complete!
+                    </p>
+                </div>
+
+                <!-- PURCHASE DETAILS -->
+                <div style="padding: 40px 30px; text-align: center;">
+                    <h2 style="color: #ffffff; font-size: 22px; margin: 0 0 20px 0;">
+                        Hey <span style="color: #ffd700;">{subscriber_name}</span>!
+                    </h2>
+
+                    <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 15px; padding: 25px; margin: 20px 0;">
+                        <p style="color: #00ff88; font-size: 14px; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 2px;">Your Purchase</p>
+                        <p style="color: #ffffff; font-size: 28px; margin: 0; font-weight: bold;">{amount} Message Pack</p>
+                        <p style="color: #888; font-size: 14px; margin-top: 10px;">Messages have been added to your account</p>
+                    </div>
+
+                    <p style="color: #b0b0b0; font-size: 16px; line-height: 1.8; margin: 25px 0;">
+                        Your messages are ready to use! Head to Event Followers and continue your conversations with The Entity.
+                    </p>
+                </div>
+
+                <!-- CTA BUTTON -->
+                <div style="padding: 20px 30px 40px; text-align: center;">
+                    <a href="https://eventfollowers.com"
+                       style="display: inline-block; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000000; padding: 18px 50px; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);">
+                        Start Chatting
+                    </a>
+                </div>
+
+                <!-- UPGRADE HINT -->
+                <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%); border-top: 1px solid rgba(255, 215, 0, 0.3); padding: 25px; text-align: center;">
+                    <p style="color: #ffd700; font-size: 14px; margin: 0;">
+                        💡 <strong>Tip:</strong> Go unlimited for just $4.99/month - no more message limits!
+                    </p>
+                </div>
+
+                <!-- FOOTER -->
+                <div style="background: #050508; padding: 25px; text-align: center; border-top: 1px solid rgba(0,255,136,0.2);">
+                    <p style="color: #555; font-size: 12px; margin: 0;">
+                        Event Followers | Helix Media Engine | ABN: 66 926 581 596
+                    </p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="https://eventfollowers.com" style="color: #888; font-size: 12px; text-decoration: none;">eventfollowers.com</a>
+                    </p>
+                </div>
+
+            </div>
+        </body>
+        </html>
+        """
 
         return self.send_email(to_email, subject, html, "astro")
 
