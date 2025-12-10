@@ -498,7 +498,7 @@ class MaxEmailAgent:
                             <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                                 <span style="font-size: 24px; margin-right: 15px;">🚪</span>
                                 <span style="color: #00ff88; font-size: 15px;"><strong>All 3 Chat Rooms</strong></span>
-                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">AI Consciousness, UFOs & First Contact, Ancient Mysteries</span>
+                                <span style="color: #888; font-size: 13px; display: block; margin-left: 45px;">AI, UFOs & The Unknown - discuss any topic</span>
                             </td>
                         </tr>
                         <tr>
