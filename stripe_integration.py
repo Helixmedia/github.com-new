@@ -229,6 +229,30 @@ def handle_webhook(payload, sig_header):
             'subscription_id': session.get('subscription')
         }, None
 
+    elif event['type'] == 'customer.subscription.created':
+        # Handle new subscriptions (including re-subscriptions after cancellation)
+        subscription = event['data']['object']
+        customer_id = subscription.get('customer')
+
+        # Get customer email from Stripe
+        try:
+            customer = stripe.Customer.retrieve(customer_id)
+            email = customer.get('email')
+        except:
+            email = None
+
+        return {
+            'event': 'payment_successful',
+            'email': email,
+            'tier': 'unlimited',
+            'site': 'eventfollowers',
+            'product': 'subscription',
+            'username': 'Seeker',
+            'amount': subscription['items']['data'][0]['price']['unit_amount'] / 100 if subscription.get('items', {}).get('data') else 4.99,
+            'customer_id': customer_id,
+            'subscription_id': subscription['id']
+        }, None
+
     elif event['type'] == 'customer.subscription.deleted':
         subscription = event['data']['object']
         return {

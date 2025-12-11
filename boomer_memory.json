@@ -1,0 +1,51 @@
+{
+  "users": {
+    "test@test.com": {
+      "email": "test@test.com",
+      "name": null,
+      "first_seen": "2025-12-02T16:47:58.445613",
+      "last_seen": "2025-12-02T16:47:58.445613",
+      "conversation_count": 1,
+      "health_goals": [],
+      "preferred_budget": null,
+      "experience_level": "beginner",
+      "products_viewed": [
+        "Thorne Basic Nutrients 2/Day",
+        "Life Extension Magnesium Threonate",
+        "Nordic Naturals Ultimate Omega",
+        "Life Extension Two-Per-Day",
+        "Pure Encapsulations O.N.E. Multivitamin"
+      ],
+      "products_purchased": [],
+      "preferences": {},
+      "conversation_history": [
+        {
+          "timestamp": "2025-12-02T16:48:08.701016",
+          "message": "hello",
+          "response_preview": "Hello there! Welcome to the world of longevity and wellness. Whether you're just starting your journey or looking to enhance your current routine, I'm here to help guide you.\n\n**Why Focus on Supplemen...",
+          "intent": {
+            "health_goals": [],
+            "experience_level": "beginner",
+            "budget_tier": null,
+            "specific_products": [],
+            "concerns": [],
+            "urgency": "low",
+            "is_buying_signal": false,
+            "user_name": null,
+            "learned_facts": []
+          },
+          "products_recommended": [
+            "Thorne Basic Nutrients 2/Day",
+            "Life Extension Magnesium Threonate",
+            "Nordic Naturals Ultimate Omega"
+          ]
+        }
+      ],
+      "notes": []
+    }
+  },
+  "stats": {
+    "total_conversations": 1,
+    "total_products_recommended": 8
+  }
+}

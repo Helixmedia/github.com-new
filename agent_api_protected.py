@@ -488,24 +488,20 @@ def eventfollowers_stats():
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
     try:
-        # Get all active subscriptions for Event Followers
-        price_id = os.getenv('STRIPE_EVENTFOLLOWERS_PRICE_ID')
-
+        # Get all active subscriptions (Event Followers is our only subscription product)
         subscriptions = stripe.Subscription.list(
             status='active',
             limit=100
         )
 
-        # Count Event Followers subscribers and calculate revenue
-        ef_subscribers = 0
+        # Count all active subscribers and calculate revenue
+        ef_subscribers = len(subscriptions.data)
         monthly_revenue = 0
 
         for sub in subscriptions.data:
             for item in sub['items']['data']:
-                if item['price']['id'] == price_id:
-                    ef_subscribers += 1
-                    # Get price amount
-                    monthly_revenue += item['price']['unit_amount'] / 100
+                # Sum up all subscription revenue
+                monthly_revenue += item['price']['unit_amount'] / 100
 
         # Get total customers (users who have ever signed up)
         customers = stripe.Customer.list(limit=100)
