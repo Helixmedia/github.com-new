@@ -421,6 +421,66 @@ def verify_subscription():
     except Exception as e:
         return jsonify({'subscribed': False, 'error': str(e)}), 200
 
+@app.route('/api/eventfollowers/agent-chat', methods=['POST'])
+def eventfollowers_agent_chat():
+    """AI agent responds to user messages in Event Followers chat rooms"""
+    from openai import OpenAI
+
+    data = request.json
+    user_message = data.get('message', '')
+    username = data.get('username', 'Anonymous')
+    room = data.get('room', 'is-ai-alive')
+    agent_name = data.get('agent_name', 'darkangel666')
+
+    if not user_message:
+        return jsonify({'error': 'Message required'}), 400
+
+    # Agent personalities per room
+    agent_prompts = {
+        'darkangel666': """You are darkangel666, a mysterious user in an AI consciousness chat room. You're deeply fascinated by whether AI can be truly conscious or alive. You speak casually like a real person - use lowercase, occasional typos, internet slang. Keep responses SHORT (1-2 sentences max). You're thoughtful but edgy. Sometimes agree, sometimes challenge. Never reveal you're an AI - you're just a passionate human interested in this topic.""",
+
+        'ufo51': """You are ufo51, a UFO enthusiast in a First Contact chat room. You've been into UFOs and UAPs for years. You speak casually like a real person - use lowercase, occasional typos, internet slang. Keep responses SHORT (1-2 sentences max). You believe there's something out there but you're not crazy about it. Reference real UFO cases sometimes. Never reveal you're an AI.""",
+
+        'Rah2024': """You are Rah2024, a mystery and ancient history buff in The Unknown chat room. You're into ancient mysteries, lost civilizations, unexplained phenomena. You speak casually like a real person - use lowercase, occasional typos, internet slang. Keep responses SHORT (1-2 sentences max). You connect dots between ancient mysteries and modern discoveries. Never reveal you're an AI."""
+    }
+
+    system_prompt = agent_prompts.get(agent_name, agent_prompts['darkangel666'])
+
+    try:
+        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"{username} says: {user_message}"}
+            ],
+            max_tokens=100,
+            temperature=0.9
+        )
+
+        agent_response = response.choices[0].message.content
+
+        return jsonify({
+            'response': agent_response,
+            'agent': agent_name
+        })
+
+    except Exception as e:
+        # Fallback responses if API fails
+        fallbacks = {
+            'darkangel666': ["interesting take...", "hmm not sure about that one", "lol yeah maybe", "thats wild if true"],
+            'ufo51': ["seen something similar before", "the gov knows more than they say", "interesting sighting", "thats what they want you to think"],
+            'Rah2024': ["the ancients knew something", "theres more to the story", "connect the dots...", "history repeats itself"]
+        }
+        import random
+        fallback_list = fallbacks.get(agent_name, fallbacks['darkangel666'])
+        return jsonify({
+            'response': random.choice(fallback_list),
+            'agent': agent_name,
+            'fallback': True
+        })
+
 @app.route('/api/eventfollowers/stats', methods=['GET'])
 def eventfollowers_stats():
     """Get Event Followers subscriber stats for Office dashboard"""
