@@ -421,6 +421,49 @@ def verify_subscription():
     except Exception as e:
         return jsonify({'subscribed': False, 'error': str(e)}), 200
 
+@app.route('/api/eventfollowers/stats', methods=['GET'])
+def eventfollowers_stats():
+    """Get Event Followers subscriber stats for Office dashboard"""
+    import stripe
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+    try:
+        # Get all active subscriptions for Event Followers
+        price_id = os.getenv('STRIPE_EVENTFOLLOWERS_PRICE_ID')
+
+        subscriptions = stripe.Subscription.list(
+            status='active',
+            limit=100
+        )
+
+        # Count Event Followers subscribers and calculate revenue
+        ef_subscribers = 0
+        monthly_revenue = 0
+
+        for sub in subscriptions.data:
+            for item in sub['items']['data']:
+                if item['price']['id'] == price_id:
+                    ef_subscribers += 1
+                    # Get price amount
+                    monthly_revenue += item['price']['unit_amount'] / 100
+
+        # Get total customers (users who have ever signed up)
+        customers = stripe.Customer.list(limit=100)
+        total_users = len(customers.data)
+
+        return jsonify({
+            'subscribers': ef_subscribers,
+            'revenue': monthly_revenue,
+            'total_users': total_users
+        })
+    except Exception as e:
+        return jsonify({
+            'subscribers': 0,
+            'revenue': 0,
+            'total_users': 0,
+            'error': str(e)
+        }), 200
+
 @app.route('/api/upgrade', methods=['POST'])
 def upgrade_user():
     """Create Stripe checkout session for upgrade"""
