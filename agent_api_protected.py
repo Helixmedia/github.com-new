@@ -520,6 +520,66 @@ def eventfollowers_stats():
             'error': str(e)
         }), 200
 
+@app.route('/api/subscribers', methods=['GET'])
+def get_subscribers():
+    """Get all subscribers from Stripe for admin dashboard"""
+    import stripe
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+    try:
+        # Get all subscriptions (active and cancelled)
+        all_subs = []
+
+        # Get active subscriptions
+        active_subscriptions = stripe.Subscription.list(status='active', limit=100)
+        for sub in active_subscriptions.data:
+            customer = stripe.Customer.retrieve(sub['customer'])
+            all_subs.append({
+                'email': customer.get('email', 'Unknown'),
+                'username': customer.get('name') or customer.get('email', 'Unknown').split('@')[0],
+                'avatar': '👽',
+                'plan': 'Premium',
+                'status': 'active',
+                'created': sub['created'],
+                'amount': sub['items']['data'][0]['price']['unit_amount'] / 100 if sub.get('items', {}).get('data') else 4.99
+            })
+
+        # Get cancelled subscriptions
+        cancelled_subscriptions = stripe.Subscription.list(status='canceled', limit=100)
+        for sub in cancelled_subscriptions.data:
+            customer = stripe.Customer.retrieve(sub['customer'])
+            all_subs.append({
+                'email': customer.get('email', 'Unknown'),
+                'username': customer.get('name') or customer.get('email', 'Unknown').split('@')[0],
+                'avatar': '👽',
+                'plan': 'Premium',
+                'status': 'cancelled',
+                'created': sub['created'],
+                'amount': sub['items']['data'][0]['price']['unit_amount'] / 100 if sub.get('items', {}).get('data') else 4.99
+            })
+
+        # Calculate stats
+        active_count = len([s for s in all_subs if s['status'] == 'active'])
+        monthly_revenue = sum(s['amount'] for s in all_subs if s['status'] == 'active')
+        lifetime_revenue = sum(s['amount'] for s in all_subs)  # Simplified - actual would track payments
+
+        return jsonify({
+            'subscribers': all_subs,
+            'total': len(all_subs),
+            'active': active_count,
+            'monthly_revenue': monthly_revenue,
+            'lifetime_revenue': lifetime_revenue
+        })
+    except Exception as e:
+        return jsonify({
+            'subscribers': [],
+            'total': 0,
+            'active': 0,
+            'monthly_revenue': 0,
+            'lifetime_revenue': 0,
+            'error': str(e)
+        }), 200
+
 @app.route('/api/upgrade', methods=['POST'])
 def upgrade_user():
     """Create Stripe checkout session for upgrade"""
