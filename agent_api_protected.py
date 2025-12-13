@@ -340,6 +340,28 @@ def get_user_stats_endpoint(email):
     stats = user_manager.get_user_stats(user['id'])
     return jsonify(stats)
 
+@app.route('/api/subscribe', methods=['POST'])
+def subscribe_lead():
+    """Simple email capture for lead magnets - stores in subscribers.json"""
+    data = request.json
+    email = data.get('email', '').strip()
+    source = data.get('source', 'unknown')  # e.g. 'lead-meteor-calendar'
+    agent = data.get('agent', 'astro')  # which agent/site
+
+    if not email:
+        return jsonify({'error': 'Email required'}), 400
+
+    # Save to subscribers database via MAX agent
+    # Using name field to store source for lead tracking
+    try:
+        add_subscriber(email, agent, name=source)
+        print(f"[LEAD] New subscriber: {email} from {source}")
+    except Exception as e:
+        print(f"[LEAD] Error saving subscriber: {e}")
+
+    return jsonify({'success': True, 'email': email, 'source': source})
+
+
 @app.route('/api/subscribe/eventfollowers', methods=['POST'])
 def subscribe_eventfollowers():
     """Create Stripe checkout for Event Followers Premium ($4.99/month)"""
