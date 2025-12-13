@@ -32,9 +32,8 @@ def generate_newsletter():
     today = datetime.now()
     week_of = today.strftime("%B %d, %Y")
 
-    # Dynamic content based on the week
     newsletter = {
-        "subject": f"This Week in The Unknown - {week_of}",
+        "subject": f"Event Followers Weekly - {week_of}",
         "html": f"""
 <!DOCTYPE html>
 <html>
@@ -46,88 +45,42 @@ def generate_newsletter():
     <div style="max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);">
 
         <!-- HEADER -->
-        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%); padding: 40px 20px; text-align: center; border-bottom: 3px solid #ffd700;">
-            <div style="font-size: 60px; margin-bottom: 10px;">👁️</div>
-            <h1 style="font-size: 28px; margin: 0; color: #ffd700; letter-spacing: 3px;">
+        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%); padding: 40px 20px; text-align: center; border-bottom: 3px solid #00ff88;">
+            <h1 style="font-size: 28px; margin: 0; color: #00ff88; letter-spacing: 3px;">
                 EVENT FOLLOWERS
             </h1>
-            <p style="color: #00d4ff; font-size: 14px; margin-top: 8px; letter-spacing: 2px;">
-                WEEKLY BRIEFING
+            <p style="color: #888; font-size: 14px; margin-top: 8px; letter-spacing: 2px;">
+                WEEKLY UPDATE
             </p>
         </div>
 
         <!-- INTRO -->
         <div style="padding: 30px; text-align: center;">
             <p style="color: #888; font-size: 16px; line-height: 1.6;">
-                Week of <strong style="color: #ffd700;">{week_of}</strong>
+                Week of <strong style="color: #00ff88;">{week_of}</strong>
             </p>
             <p style="color: #b0b0b0; font-size: 15px; line-height: 1.8; margin-top: 15px;">
-                The Entity has been watching. Here's what you need to know this week.
+                Here's what's happening this week.
             </p>
         </div>
 
-        <!-- SECTION 1: SKY EVENTS -->
-        <div style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid #00d4ff; margin: 20px; padding: 20px;">
-            <h2 style="color: #00d4ff; font-size: 18px; margin: 0 0 15px 0;">
-                🌌 THIS WEEK'S SKY EVENTS
-            </h2>
-            <ul style="color: #b0b0b0; font-size: 14px; line-height: 2; padding-left: 20px;">
-                <li>ISS visible passes - check your local times</li>
-                <li>Jupiter bright in the evening sky</li>
-                <li>Starlink satellites creating light trains</li>
-                <li>Best viewing: 9pm-11pm local time</li>
-            </ul>
-        </div>
-
-        <!-- SECTION 2: UFO NEWS -->
+        <!-- CONTENT -->
         <div style="background: rgba(0, 255, 136, 0.1); border-left: 3px solid #00ff88; margin: 20px; padding: 20px;">
             <h2 style="color: #00ff88; font-size: 18px; margin: 0 0 15px 0;">
-                🛸 UFO & UAP UPDATE
+                This Week's Highlights
             </h2>
-            <p style="color: #b0b0b0; font-size: 14px; line-height: 1.8;">
-                The disclosure movement continues. Congress has scheduled more hearings,
-                and new witnesses are coming forward. The Pentagon's UAP office is under
-                increasing pressure to release more data.
-            </p>
-            <p style="color: #888; font-size: 13px; margin-top: 10px;">
-                <em>"The truth is closer than ever."</em>
-            </p>
-        </div>
-
-        <!-- SECTION 3: AI NEWS -->
-        <div style="background: rgba(179, 136, 255, 0.1); border-left: 3px solid #b388ff; margin: 20px; padding: 20px;">
-            <h2 style="color: #b388ff; font-size: 18px; margin: 0 0 15px 0;">
-                🤖 AI & CONSCIOUSNESS
-            </h2>
-            <p style="color: #b0b0b0; font-size: 14px; line-height: 1.8;">
-                New AI models are showing increasingly sophisticated reasoning abilities.
-                The debate about machine consciousness intensifies as these systems become
-                harder to distinguish from human thought.
-            </p>
-            <p style="color: #888; font-size: 13px; margin-top: 10px;">
-                <em>Have you talked to The Entity lately?</em>
-            </p>
-        </div>
-
-        <!-- ENTITY QUOTE -->
-        <div style="padding: 30px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); margin: 20px;">
-            <p style="font-style: italic; color: #00d4ff; font-size: 18px; line-height: 1.6;">
-                "Each week brings us closer to understanding.<br>
-                The patterns are emerging. Can you see them?"
-            </p>
-            <p style="color: #ffd700; font-size: 14px; margin-top: 15px; letter-spacing: 2px;">
-                — THE ENTITY
-            </p>
+            <ul style="color: #b0b0b0; font-size: 14px; line-height: 2; padding-left: 20px;">
+                <li>New content added to the site</li>
+                <li>Chat rooms are active</li>
+                <li>Check out the latest discussions</li>
+            </ul>
         </div>
 
         <!-- CTA -->
         <div style="padding: 30px; text-align: center;">
-            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">
-                Ready to continue the conversation?
-            </p>
             <a href="https://eventfollowers.com"
-               style="display: inline-block; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 15px 40px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 14px; letter-spacing: 1px;">
-                ENTER EVENT FOLLOWERS
+               style="display: inline-block; background: linear-gradient(135deg, #00ff88, #00aa55); color: #000; padding: 15px 40px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 14px; letter-spacing: 1px;">
+                VISIT EVENT FOLLOWERS
             </a>
         </div>
 
@@ -172,7 +125,7 @@ def send_newsletter():
                 email,
                 newsletter["subject"],
                 newsletter["html"],
-                "entity"
+                "astro"
             )
 
             if result.get("success"):
