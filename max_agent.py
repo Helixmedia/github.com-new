@@ -41,6 +41,12 @@ AGENTS = {
         "site": "eventfollowers.com",
         "color": "#1a237e"
     },
+    "entity": {
+        "email": "entity@helixmediaengine.com",
+        "name": "The Entity",
+        "site": "eventfollowers.com",
+        "color": "#ffd700"
+    },
     "sage": {
         "email": "sage@helixmediaengine.com",
         "name": "SAGE - Silent AI",

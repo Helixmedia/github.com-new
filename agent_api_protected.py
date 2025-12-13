@@ -20,6 +20,8 @@ import pusher
 from dotenv import load_dotenv
 # MAX - Centralized Email Agent (handles ALL email operations)
 from max_agent import send_welcome_email, add_subscriber, remove_subscriber, get_subscriber_stats, send_failure_alert, send_lead_magnet_emails
+# Newsletter agent
+from newsletter_agent import send_newsletter, send_test_newsletter
 # MAX-VITA - Longevity Futures dedicated email agent with AR (auto-response)
 from max_vita import max_vita, handle_inbound_email as vita_handle_inbound
 
@@ -809,6 +811,35 @@ def get_all_subscribers():
     try:
         stats = get_subscriber_stats()
         return jsonify(stats)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/newsletter/send', methods=['POST'])
+def api_send_newsletter():
+    """Send weekly newsletter to all subscribers - from The Entity"""
+    try:
+        results = send_newsletter()
+        return jsonify({
+            'success': True,
+            'sent': results['sent'],
+            'failed': results['failed']
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/newsletter/test', methods=['POST'])
+def api_test_newsletter():
+    """Send test newsletter to a single email"""
+    data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify({'error': 'Email required'}), 400
+
+    try:
+        result = send_test_newsletter(email)
+        return jsonify({'success': result.get('success', False), 'result': result})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
