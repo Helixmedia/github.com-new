@@ -342,7 +342,7 @@ def get_user_stats_endpoint(email):
 
 @app.route('/api/subscribe', methods=['POST'])
 def subscribe_lead():
-    """Email capture for lead magnets - sends 10 emails immediately as value exchange"""
+    """Email capture for lead magnets - gives 10 free chat messages as value exchange"""
     data = request.json
     email = data.get('email', '').strip()
     source = data.get('source', 'unknown')  # e.g. 'lead-meteor-calendar'
@@ -358,14 +358,16 @@ def subscribe_lead():
     except Exception as e:
         print(f"[LEAD] Error saving subscriber: {e}")
 
-    # SEND 10 EMAILS IMMEDIATELY - this is the value they get for their email
+    # GIVE THEM 10 FREE CHAT MESSAGES - this is the value they get for their email
     try:
-        result = send_lead_magnet_emails(email, source)
-        print(f"[LEAD] Sent {result.get('sent', 0)}/10 emails to {email}")
+        user, error = user_manager.get_or_create_user(email)
+        if user:
+            user_manager.add_messages(user['id'], 10)
+            print(f"[LEAD] Added 10 free messages to {email}")
     except Exception as e:
-        print(f"[LEAD] Error sending email sequence: {e}")
+        print(f"[LEAD] Error adding messages: {e}")
 
-    return jsonify({'success': True, 'email': email, 'source': source, 'emails_sent': 10})
+    return jsonify({'success': True, 'email': email, 'source': source, 'messages_added': 10})
 
 
 @app.route('/api/subscribe/eventfollowers', methods=['POST'])
