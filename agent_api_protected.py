@@ -19,7 +19,7 @@ import uuid
 import pusher
 from dotenv import load_dotenv
 # MAX - Centralized Email Agent (handles ALL email operations)
-from max_agent import send_welcome_email, add_subscriber, remove_subscriber, get_subscriber_stats, send_failure_alert
+from max_agent import send_welcome_email, add_subscriber, remove_subscriber, get_subscriber_stats, send_failure_alert, send_lead_magnet_emails
 # MAX-VITA - Longevity Futures dedicated email agent with AR (auto-response)
 from max_vita import max_vita, handle_inbound_email as vita_handle_inbound
 
@@ -342,7 +342,7 @@ def get_user_stats_endpoint(email):
 
 @app.route('/api/subscribe', methods=['POST'])
 def subscribe_lead():
-    """Simple email capture for lead magnets - stores in subscribers.json"""
+    """Email capture for lead magnets - sends 10 emails immediately as value exchange"""
     data = request.json
     email = data.get('email', '').strip()
     source = data.get('source', 'unknown')  # e.g. 'lead-meteor-calendar'
@@ -352,14 +352,20 @@ def subscribe_lead():
         return jsonify({'error': 'Email required'}), 400
 
     # Save to subscribers database via MAX agent
-    # Using name field to store source for lead tracking
     try:
         add_subscriber(email, agent, name=source)
         print(f"[LEAD] New subscriber: {email} from {source}")
     except Exception as e:
         print(f"[LEAD] Error saving subscriber: {e}")
 
-    return jsonify({'success': True, 'email': email, 'source': source})
+    # SEND 10 EMAILS IMMEDIATELY - this is the value they get for their email
+    try:
+        result = send_lead_magnet_emails(email, source)
+        print(f"[LEAD] Sent {result.get('sent', 0)}/10 emails to {email}")
+    except Exception as e:
+        print(f"[LEAD] Error sending email sequence: {e}")
+
+    return jsonify({'success': True, 'email': email, 'source': source, 'emails_sent': 10})
 
 
 @app.route('/api/subscribe/eventfollowers', methods=['POST'])

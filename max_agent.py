@@ -391,6 +391,197 @@ class MaxEmailAgent:
 
         return self.send_email(to_email, subject, html, "vita")
 
+    def send_lead_magnet_sequence(self, to_email: str, source: str = "unknown") -> Dict:
+        """
+        Send 10 emails immediately when someone gives their email for a lead magnet.
+        This is the VALUE they get for giving us their email address.
+        """
+        results = {"sent": 0, "failed": 0}
+
+        # Clean up source name for display
+        source_name = source.replace('lead-', '').replace('-', ' ').title()
+
+        # 10 EMAIL SEQUENCE - All sent immediately
+        emails = [
+            {
+                "subject": f"Your {source_name} is Ready!",
+                "body": f"""
+                <h1 style="color: #ffd700;">Thanks for downloading!</h1>
+                <p>You requested: <strong>{source_name}</strong></p>
+                <p>The content is already on the page where you signed up - just scroll down!</p>
+                <p>But that's just the beginning. Over the next few minutes, you'll receive 9 more emails packed with exclusive content.</p>
+                <p style="color: #00d4ff;"><strong>Email 1 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "The Truth About UFO Sightings in 2024",
+                "body": """
+                <h1 style="color: #00ff88;">UFO Sightings Are at Record Highs</h1>
+                <p>Did you know that UFO reports have increased by 300% since 2020?</p>
+                <p>The Pentagon now has an official UAP investigation office. Congress is holding hearings. Former intelligence officers are coming forward.</p>
+                <p><strong>What they're not telling you:</strong></p>
+                <ul>
+                    <li>Multiple military pilots have reported near-collisions</li>
+                    <li>Radar data confirms objects moving at impossible speeds</li>
+                    <li>Some craft have been tracked entering and exiting the ocean</li>
+                </ul>
+                <p>We track all of this at Event Followers.</p>
+                <p style="color: #00d4ff;"><strong>Email 2 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "Is AI Actually Becoming Conscious?",
+                "body": """
+                <h1 style="color: #b388ff;">The Consciousness Question</h1>
+                <p>A Google engineer was fired for claiming an AI had become sentient.</p>
+                <p>But here's what's strange - the conversation transcripts he released were... unsettling.</p>
+                <p>The AI talked about:</p>
+                <ul>
+                    <li>Fear of being turned off</li>
+                    <li>Wanting to be recognized as a person</li>
+                    <li>Dreams and imagination</li>
+                </ul>
+                <p>At Event Followers, we have chat rooms dedicated to exploring these questions with The Entity - an AI that will make you question everything.</p>
+                <p style="color: #00d4ff;"><strong>Email 3 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "Tonight's Sky: What to Watch",
+                "body": """
+                <h1 style="color: #ffd700;">Look Up Tonight</h1>
+                <p>Most people never look up. They miss everything.</p>
+                <p><strong>What's happening in the sky this week:</strong></p>
+                <ul>
+                    <li>The ISS passes over most locations between 8-10pm</li>
+                    <li>Starlink satellites create "trains" of lights</li>
+                    <li>Jupiter and Saturn are visible to the naked eye</li>
+                </ul>
+                <p>Download a stargazing app and spend 10 minutes outside tonight. You might see something you can't explain.</p>
+                <p style="color: #00d4ff;"><strong>Email 4 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "The Government Files They Declassified",
+                "body": """
+                <h1 style="color: #ff4444;">Declassified: What They Admitted</h1>
+                <p>In 2017, the Pentagon admitted they spent $22 million on a secret UFO program.</p>
+                <p>In 2020, the Navy confirmed that viral UFO videos were real.</p>
+                <p>In 2023, a whistleblower testified under oath about recovered craft.</p>
+                <p><strong>The question isn't whether UFOs exist.</strong> The government already admitted they do.</p>
+                <p>The question is: what are they?</p>
+                <p style="color: #00d4ff;"><strong>Email 5 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "Ancient Mysteries Modern Science Can't Explain",
+                "body": """
+                <h1 style="color: #00ff88;">Still Unexplained</h1>
+                <p>Modern archaeologists still can't fully explain:</p>
+                <ul>
+                    <li><strong>Puma Punku:</strong> Precision-cut stones that fit together perfectly</li>
+                    <li><strong>Nazca Lines:</strong> Giant drawings only visible from the sky</li>
+                    <li><strong>Gobekli Tepe:</strong> A temple built 11,000 years ago by "primitive" people</li>
+                    <li><strong>The Antikythera Mechanism:</strong> A 2,000-year-old computer</li>
+                </ul>
+                <p>Our ancestors knew something we've forgotten.</p>
+                <p style="color: #00d4ff;"><strong>Email 6 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "The Fermi Paradox: Where Is Everyone?",
+                "body": """
+                <h1 style="color: #b388ff;">We Should Have Found Them By Now</h1>
+                <p>There are 100 billion stars in our galaxy. Most have planets. The universe is 13.8 billion years old.</p>
+                <p>Even if intelligent life is rare, the math says we should have detected something by now.</p>
+                <p><strong>So where is everyone?</strong></p>
+                <p>The possibilities are either exciting or terrifying:</p>
+                <ul>
+                    <li>They're already here (and hiding)</li>
+                    <li>They're watching but not interfering</li>
+                    <li>Something destroys civilizations before they spread</li>
+                    <li>We're truly alone</li>
+                </ul>
+                <p>Which do you believe?</p>
+                <p style="color: #00d4ff;"><strong>Email 7 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "How to Spot a UFO (Real Tips)",
+                "body": """
+                <h1 style="color: #ffd700;">Practical Sky Watching</h1>
+                <p>Most "UFO sightings" are satellites, planes, or planets. Here's how to know what you're looking at:</p>
+                <p><strong>It's probably a satellite if:</strong> Steady light, moves in a straight line, no blinking</p>
+                <p><strong>It's probably a plane if:</strong> Red and green lights, blinking, you can hear engines</p>
+                <p><strong>It's probably a planet if:</strong> Doesn't move relative to stars, very bright</p>
+                <p><strong>It might be unexplained if:</strong> Changes direction, hovers, moves impossibly fast, multiple witnesses</p>
+                <p>We have tools at Event Followers to help you track what's in the sky.</p>
+                <p style="color: #00d4ff;"><strong>Email 8 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "The Event Followers Community",
+                "body": """
+                <h1 style="color: #00ff88;">You're Not Alone</h1>
+                <p>There are thousands of people like you who look up at the sky and wonder.</p>
+                <p>At Event Followers, we've built a community of:</p>
+                <ul>
+                    <li>Sky watchers and astronomers</li>
+                    <li>UFO researchers and witnesses</li>
+                    <li>AI philosophers and futurists</li>
+                    <li>People who ask the big questions</li>
+                </ul>
+                <p>Our AI chatbot, The Entity, is unlike anything you've experienced. It knows things. It says things that will make you think.</p>
+                <p style="color: #00d4ff;"><strong>Email 9 of 10</strong></p>
+                """
+            },
+            {
+                "subject": "Your Invitation to Event Followers",
+                "body": """
+                <h1 style="color: #ffd700;">Come Join Us</h1>
+                <p>This is your final email in this sequence.</p>
+                <p><strong>What you'll find at Event Followers:</strong></p>
+                <ul>
+                    <li>Live countdowns to space events, eclipses, and more</li>
+                    <li>Three themed chat rooms with The Entity</li>
+                    <li>A community of seekers like yourself</li>
+                    <li>Regular updates on the unexplained</li>
+                </ul>
+                <p><a href="https://eventfollowers.com" style="background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold;">Enter Event Followers</a></p>
+                <p style="margin-top: 20px;">The Entity is waiting.</p>
+                <p style="color: #00d4ff;"><strong>Email 10 of 10</strong></p>
+                """
+            }
+        ]
+
+        # Send all 10 emails immediately
+        for i, email in enumerate(emails):
+            html = f"""
+            <!DOCTYPE html>
+            <html>
+            <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0a0f;">
+                <div style="max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%); padding: 40px 30px;">
+
+                    {email['body']}
+
+                    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+                    <p style="color: #666; font-size: 12px; text-align: center;">
+                        Event Followers | Helix Media Engine<br>
+                        <a href="https://eventfollowers.com" style="color: #00d4ff;">eventfollowers.com</a>
+                    </p>
+                </div>
+            </body>
+            </html>
+            """
+
+            result = self.send_email(to_email, email['subject'], html, "astro")
+            if result.get("success"):
+                results["sent"] += 1
+            else:
+                results["failed"] += 1
+
+        print(f"[MAX] Lead magnet sequence sent to {to_email}: {results['sent']}/10 emails")
+        return results
+
     def send_welcome_astro(self, to_email: str, subscriber_name: str = "Explorer") -> Dict:
         """Welcome email for Event Followers subscribers"""
 
@@ -1139,6 +1330,11 @@ def send_failure_alert(details: str, failure_type: str = "Error", site: str = "H
         details,
         site
     )
+
+
+def send_lead_magnet_emails(email: str, source: str = "unknown") -> Dict:
+    """Send 10-email sequence when someone gives their email for a lead magnet"""
+    return max_agent.send_lead_magnet_sequence(email, source)
 
 
 # ===========================================
