@@ -530,9 +530,9 @@ Please write a helpful, personalized response."""
                 <li>Latest anti-aging science</li>
             </ul>
 
-            <p><a href="https://{self.config['domain']}/articles.html"
+            <p><a href="https://{self.config['domain']}/ebook-library.html"
                   style="background: {self.config['color']}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Browse Our Articles
+                Browse Our Ebook Library
             </a></p>
 
             <p style="color: #666; font-size: 14px; margin-top: 30px;">
