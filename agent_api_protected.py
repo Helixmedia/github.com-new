@@ -1101,11 +1101,10 @@ def vita_add_subscriber():
 
         # Send welcome email if new subscriber
         if result.get('is_new'):
-            try:
-                max_vita.send_welcome_email(email, name or 'Friend')
+            email_result = max_vita.send_welcome_email(email, name or 'Friend')
+            result['welcome_email'] = email_result
+            if email_result.get('success'):
                 max_vita.mark_welcome_sent(result['id'])
-            except Exception as e:
-                print(f"[MAX-VITA] Failed to send welcome email: {e}")
 
         return jsonify(result)
     except Exception as e:
