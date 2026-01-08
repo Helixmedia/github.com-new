@@ -931,20 +931,24 @@ def stripe_webhook():
 @app.route('/api/email/subscribe', methods=['POST'])
 def email_subscribe():
     """Email subscription endpoint with welcome email"""
-    data = request.get_json()
-    email = data.get('email')
-    agent = data.get('agent', 'vita')
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        agent = data.get('agent', 'vita')
 
-    if not email:
-        return jsonify({'error': 'Email required'}), 400
+        if not email:
+            return jsonify({'error': 'Email required'}), 400
 
-    # Send welcome email based on agent (uses wrapper function from max_agent)
-    result = send_welcome_email(email, agent)
+        # Send welcome email based on agent (uses wrapper function from max_agent)
+        result = send_welcome_email(email, agent)
 
-    # Also save to subscribers database
-    add_subscriber(email, agent)
+        # Also save to subscribers database
+        add_subscriber(email, agent)
 
-    return jsonify({'success': True, 'result': result})
+        return jsonify({'success': True, 'result': result})
+    except Exception as e:
+        print(f"[EMAIL SUBSCRIBE ERROR] {e}")
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/email/subscribers', methods=['GET'])
