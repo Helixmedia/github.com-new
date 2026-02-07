@@ -24,6 +24,68 @@ except ImportError:
     print("[BOOMER] GHOST not available - Amazon product finder disabled")
 
 
+class VitaKnowledge:
+    """VITA's knowledge base - knows all articles on the site"""
+
+    def __init__(self):
+        self.knowledge = self._load_knowledge()
+
+    def _load_knowledge(self):
+        """Load knowledge base from file or URL"""
+        import requests
+        try:
+            # Try to fetch from live site
+            response = requests.get('https://longevityfutures.online/vita-knowledge.json', timeout=5)
+            if response.ok:
+                return response.json()
+        except:
+            pass
+
+        # Fallback to local file
+        kb_file = Path(__file__).parent.parent / 'longevityfutures' / 'vita-knowledge.json'
+        if kb_file.exists():
+            try:
+                with open(kb_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except:
+                pass
+        return {'articles': []}
+
+    def search(self, query, max_results=5):
+        """Search knowledge base for relevant articles"""
+        query_lower = query.lower()
+        keywords = query_lower.split()
+
+        results = []
+        for article in self.knowledge.get('articles', []):
+            score = 0
+            text = f"{article.get('title', '')} {article.get('description', '')} {article.get('summary', '')}".lower()
+
+            for keyword in keywords:
+                if len(keyword) > 3 and keyword in text:
+                    score += 1
+                    if keyword in article.get('title', '').lower():
+                        score += 2  # Title match is more important
+
+            if score > 0:
+                results.append((score, article))
+
+        results.sort(key=lambda x: x[0], reverse=True)
+        return [r[1] for r in results[:max_results]]
+
+    def get_article_context(self, query):
+        """Get context string about relevant articles"""
+        articles = self.search(query, max_results=3)
+        if not articles:
+            return ""
+
+        context = "RELEVANT ARTICLES ON OUR SITE:\n"
+        for a in articles:
+            url = f"https://longevityfutures.online{a['url']}"
+            context += f"- {a['title']}: {a.get('description', '')[:100]}... ({url})\n"
+        return context
+
+
 class BoomerMemory:
     """Persistent memory system for BOOMER - survives restarts"""
 
@@ -203,6 +265,7 @@ class BoomerAgent:
         self.astro = AstroV2OpenAI(WEBSITES['longevityfutures'])
         self.products = self.astro.product_database
         self.memory = BoomerMemory()  # Persistent memory system
+        self.knowledge = VitaKnowledge()  # Site knowledge base
 
         # Health goal to product category mapping
         self.goal_mapping = {
@@ -695,8 +758,11 @@ YOU ARE AN EXPERT WHO KNOWS:
 
 User asked: "{message}"
 
+{self.knowledge.get_article_context(message)}
+
 IMPORTANT: You specialize in health, longevity, and wellness products ONLY.
 If the user asks about non-health products, politely explain you focus on longevity/health and suggest askmarket.store for other products.
+When relevant articles exist on our site, LINK TO THEM in your response!
 
 {"USER CONTEXT (what we know about them): " + user_context if user_context else "This is a new user."}
 
