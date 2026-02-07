@@ -513,37 +513,50 @@ Please write a helpful, personalized response."""
     def send_welcome_email(self, to_email: str, subscriber_name: str = "Friend") -> Dict:
         """Welcome email for new Longevity Futures subscribers"""
 
-        subject = "Welcome to Longevity Futures - Your Journey Starts Now"
+        subject = "Your Free Wellness Guide is Here!"
 
         html = f"""
         <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: {self.config['color']};">Welcome to Longevity Futures, {subscriber_name}!</h1>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb;">
+            <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px; border-radius: 15px 15px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0;">Welcome, {subscriber_name}!</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0;">Your wellness journey starts now</p>
+            </div>
 
-            <p>You've just joined thousands of others on a journey to live longer, healthier lives.</p>
+            <div style="background: white; padding: 30px; border-radius: 0 0 15px 15px;">
+                <h2 style="color: #10b981; margin-top: 0;">Your Free Wellness Guide</h2>
+                <p>Thank you for joining Longevity Futures! As promised, here's your comprehensive Women's Wellness Guide packed with:</p>
 
-            <h2 style="color: {self.config['color']};">What you'll get:</h2>
-            <ul>
-                <li>Evidence-based longevity research</li>
-                <li>Supplement guides and reviews</li>
-                <li>Lifestyle optimization tips</li>
-                <li>Latest anti-aging science</li>
-            </ul>
+                <ul style="color: #555; line-height: 1.8;">
+                    <li><strong>5 Essential Supplements</strong> every woman should consider</li>
+                    <li><strong>Exact dosages</strong> and best times to take them</li>
+                    <li><strong>Synergy tips</strong> - which supplements work better together</li>
+                    <li><strong>Interactions to avoid</strong> - stay safe and effective</li>
+                    <li><strong>Your daily supplement schedule</strong> - morning, afternoon, evening</li>
+                </ul>
 
-            <p><a href="https://{self.config['domain']}/articles/longevity-escape-velocity-science.html"
-                  style="background: {self.config['color']}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Read: Longevity Escape Velocity
-            </a></p>
+                <p style="text-align: center; margin: 30px 0;">
+                    <a href="https://{self.config['domain']}/ebooks/womens-wellness-guide.html"
+                       style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 15px 35px; text-decoration: none; border-radius: 30px; display: inline-block; font-weight: bold; font-size: 16px;">
+                        Download Your Free Guide
+                    </a>
+                </p>
 
-            <p style="color: #666; font-size: 14px; margin-top: 30px;">
-                Questions? Just reply to this email - I'm here to help!<br>
-                - {self.config['agent_name']}, Your Longevity Guide
-            </p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
 
-            <hr style="border: none; border-top: 1px solid #eee; margin-top: 30px;">
-            <p style="color: #999; font-size: 12px;">
+                <h3 style="color: #10b981;">Need Help? Chat with VITA!</h3>
+                <p style="color: #555;">Got questions about supplements, dosing, or what's right for you? VITA is our AI wellness expert - she knows her stuff!</p>
+                <p><a href="https://{self.config['domain']}" style="color: #10b981;">Visit the site and click the VITA button to chat</a></p>
+
+                <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                    Here's to your health and longevity!<br>
+                    - {self.config['agent_name']}, Your Longevity Guide
+                </p>
+            </div>
+
+            <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
                 Helix Media Engine | ABN: 66 926 581 596<br>
-                <a href="https://{self.config['domain']}/unsubscribe">Unsubscribe</a>
+                <a href="https://{self.config['domain']}/unsubscribe" style="color: #999;">Unsubscribe</a>
             </p>
         </body>
         </html>
