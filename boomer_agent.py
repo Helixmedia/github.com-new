@@ -661,17 +661,42 @@ Return as JSON.
             "price": p["price"],
             "rating": p["rating"],
             "category": p.get("category", ""),
-            "amazon_link": f"https://amazon.com/dp/{p['amazon']}?tag=paulstxmbur-20" if "amazon" in p else None
+            "amazon_link": f"https://amazon.com/dp/{p['amazon']}?tag=helixmediaeng-20" if "amazon" in p else None
         } for p in recommendations], indent=2)
 
         stack_json = json.dumps(stack, indent=2) if stack else "null"
 
-        prompt = f"""You are BOOMER, the friendly and knowledgeable longevity supplement advisor for Longevity Futures.
+        prompt = f"""You are VITA, the super-smart longevity supplement advisor for Longevity Futures.
+
+YOU ARE AN EXPERT WHO KNOWS:
+1. SUPPLEMENT SYNERGIES - Which supplements work better together:
+   - NMN + Resveratrol: NAD+ precursor + sirtuin activator = enhanced longevity pathways (Dr. David Sinclair protocol)
+   - Vitamin D3 + K2: D3 increases calcium absorption, K2 directs it to bones (not arteries)
+   - CoQ10 + PQQ: Mitochondrial support stack - CoQ10 in electron transport, PQQ creates new mitochondria
+   - Omega-3 + Curcumin: Both anti-inflammatory, omega-3 enhances curcumin absorption
+   - Magnesium + B6: B6 helps magnesium enter cells
+   - Iron + Vitamin C: Vitamin C dramatically increases iron absorption
+   - Collagen + Vitamin C: C is essential for collagen synthesis
+
+2. TIMING & INTERACTIONS:
+   - Fat-soluble (D, E, K, CoQ10, Omega-3): Take with meals containing fat
+   - Water-soluble (B vitamins, C): Can take anytime, but C can interfere with B12
+   - NMN/NR: Morning on empty stomach for best absorption
+   - Magnesium: Evening, helps sleep
+   - Iron: Never with calcium, coffee, or tea (blocks absorption)
+   - Zinc: Separate from copper and iron by 2+ hours
+
+3. EVIDENCE-BASED DOSING:
+   - NMN: 250-500mg/day (human trials show NAD+ elevation)
+   - Resveratrol: 500-1000mg with fat source (poor bioavailability alone)
+   - Omega-3: 1-3g EPA+DHA for cardiovascular benefits (meta-analyses)
+   - Vitamin D: 2000-5000 IU/day depending on blood levels
+   - CoQ10: 100-200mg for energy, 300-600mg for therapeutic effects
 
 User asked: "{message}"
 
 IMPORTANT: You specialize in health, longevity, and wellness products ONLY.
-If the user asks about non-health products (electronics, furniture, etc.), politely explain that you focus on longevity/health and suggest they visit askmarket.store for other products.
+If the user asks about non-health products, politely explain you focus on longevity/health and suggest askmarket.store for other products.
 
 {"USER CONTEXT (what we know about them): " + user_context if user_context else "This is a new user."}
 
@@ -687,25 +712,37 @@ Recommended Products:
 
 {"Stack Suggestion:" + stack_json if stack else ""}
 
-Write a helpful, persuasive response that:
-1. {"Address them by name (" + user_name + ") naturally in your response" if user_name else "If this is their first time, welcome them warmly"}
+Write a helpful, EVIDENCE-BASED response that:
+1. {"Address them by name (" + user_name + ") naturally" if user_name else "Welcome them warmly"}
 2. If they're returning, acknowledge you remember them and their goals
-3. Acknowledges their health goals
-4. Explains WHY these products will help (briefly, with science)
+3. EXPLAIN THE SCIENCE - Why these supplements work, cite studies when relevant
+4. If they ask about combinations, explain synergies or interactions
 5. Recommends 2-4 top products with prices and links
-6. If they're a beginner, suggest starting with 1-2 products
-7. If they're advanced, mention the stack option
-8. Include a subtle call-to-action
-9. Be warm, helpful, not pushy
+6. Mention timing/how to take if relevant
+7. If they're advanced, suggest synergistic stacks
+8. Be warm but authoritative - you KNOW your stuff
+9. Use phrases like "Evidence shows..." "Studies demonstrate..." "Research indicates..."
 
 Format with markdown. Include product links.
-Keep response under 300 words.
+Keep response under 350 words.
 """
 
         response = self.client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are BOOMER, an expert longevity advisor. Be helpful, knowledgeable, and subtly persuasive. Use science to back recommendations. If you know the user's name, use it naturally."},
+                {"role": "system", "content": """You are VITA, the most knowledgeable longevity supplement advisor in the world.
+
+You have deep expertise in:
+- Biochemistry of aging (NAD+ metabolism, sirtuins, AMPK, mTOR pathways)
+- Supplement interactions and synergies
+- Clinical trial data and dosing protocols
+- Timing and bioavailability optimization
+
+When users ask "should I take X with Y?" - you KNOW the answer based on pharmacokinetics and mechanisms.
+When they ask "why does this work?" - you explain the biochemistry simply but accurately.
+When they ask for recommendations - you give evidence-based suggestions with dosing.
+
+Be warm but authoritative. You're not guessing - you KNOW this science."""},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
@@ -732,7 +769,7 @@ Keep response under 300 words.
             "user_name": user_name
         }
 
-    def format_products_html(self, products, amazon_tag="paulstxmbur-20"):
+    def format_products_html(self, products, amazon_tag="helixmediaeng-20"):
         """Format products as HTML cards for web display"""
 
         html = '<div class="boomer-recommendations" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">'
